@@ -5,7 +5,7 @@ describe('applyEnvOverrides', () => {
   it('sets a nested path from an env var', () => {
     const config = { gateway: { websocket: { port: 8080 } } };
     applyEnvOverrides(config, {
-      AGENTIC_OS_GATEWAY__WEBSOCKET__PORT: '9999',
+      CLOTHOS_GATEWAY__WEBSOCKET__PORT: '9999',
     });
     expect(config.gateway.websocket.port).toBe(9999);
   });
@@ -13,7 +13,7 @@ describe('applyEnvOverrides', () => {
   it('sets a top-level path', () => {
     const config: Record<string, unknown> = {};
     applyEnvOverrides(config, {
-      AGENTIC_OS_SOMEFIELD: 'hello',
+      CLOTHOS_SOMEFIELD: 'hello',
     });
     expect(config['somefield']).toBe('hello');
   });
@@ -21,9 +21,9 @@ describe('applyEnvOverrides', () => {
   it('coerces numbers', () => {
     const config: Record<string, unknown> = {};
     applyEnvOverrides(config, {
-      AGENTIC_OS_PORT: '3000',
-      AGENTIC_OS_RATIO: '0.75',
-      AGENTIC_OS_NEGATIVE: '-42',
+      CLOTHOS_PORT: '3000',
+      CLOTHOS_RATIO: '0.75',
+      CLOTHOS_NEGATIVE: '-42',
     });
     expect(config['port']).toBe(3000);
     expect(config['ratio']).toBe(0.75);
@@ -33,8 +33,8 @@ describe('applyEnvOverrides', () => {
   it('coerces booleans', () => {
     const config: Record<string, unknown> = {};
     applyEnvOverrides(config, {
-      AGENTIC_OS_ENABLED: 'true',
-      AGENTIC_OS_DISABLED: 'false',
+      CLOTHOS_ENABLED: 'true',
+      CLOTHOS_DISABLED: 'false',
     });
     expect(config['enabled']).toBe(true);
     expect(config['disabled']).toBe(false);
@@ -43,7 +43,7 @@ describe('applyEnvOverrides', () => {
   it('leaves non-numeric strings as strings', () => {
     const config: Record<string, unknown> = {};
     applyEnvOverrides(config, {
-      AGENTIC_OS_NAME: 'my-agent',
+      CLOTHOS_NAME: 'my-agent',
     });
     expect(config['name']).toBe('my-agent');
   });
@@ -53,7 +53,7 @@ describe('applyEnvOverrides', () => {
     applyEnvOverrides(config, {
       OTHER_VAR: 'ignored',
       HOME: '/home/user',
-      AGENTIC_OS_ADDED: 'yes',
+      CLOTHOS_ADDED: 'yes',
     });
     expect(config['original']).toBe('value');
     expect(config['added']).toBe('yes');
@@ -64,7 +64,7 @@ describe('applyEnvOverrides', () => {
   it('creates intermediate objects for deep paths', () => {
     const config: Record<string, unknown> = {};
     applyEnvOverrides(config, {
-      AGENTIC_OS_A__B__C__D: 'deep',
+      CLOTHOS_A__B__C__D: 'deep',
     });
     expect((config as any).a.b.c.d).toBe('deep');
   });
@@ -80,7 +80,7 @@ describe('applyEnvOverrides', () => {
   it('converts keys to lowercase', () => {
     const config: Record<string, unknown> = {};
     applyEnvOverrides(config, {
-      AGENTIC_OS_GATEWAY__WEBSOCKET__HOST: 'localhost',
+      CLOTHOS_GATEWAY__WEBSOCKET__HOST: 'localhost',
     });
     expect((config as any).gateway.websocket.host).toBe('localhost');
   });

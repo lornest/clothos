@@ -8,7 +8,7 @@ import type {
   ModelsConfig,
   AgentEntry,
   AgentDefaults,
-} from '@agentic-os/core';
+} from '@clothos/core';
 
 /** Returned by the `context_assemble` hook. */
 export interface AssembledContext {

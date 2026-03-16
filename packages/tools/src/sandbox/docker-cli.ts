@@ -1,4 +1,4 @@
-import type { DockerConfig } from '@agentic-os/core';
+import type { DockerConfig } from '@clothos/core';
 import { execFile, type ExecResult } from './exec-util.js';
 
 export interface DockerCreateOptions {

@@ -8,7 +8,7 @@ import type {
   InboundMessage,
   Logger,
   OutboundMessage,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import { resolveAgent } from './binding-resolver.js';
 import { buildAgentMessage, buildOutboundMessage } from './message-builder.js';
 

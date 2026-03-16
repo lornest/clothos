@@ -1,4 +1,4 @@
-import type { ToolDefinition, ToolHandler, PolicyContext } from '@agentic-os/core';
+import type { ToolDefinition, ToolHandler, PolicyContext } from '@clothos/core';
 import type { McpClientManager } from './mcp-client-manager.js';
 import type { PolicyEngine } from '../policy-engine.js';
 import { validateToolArgs, formatValidationErrors } from './schema-validator.js';

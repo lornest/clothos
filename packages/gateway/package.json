@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-os/gateway",
+  "name": "@clothos/gateway",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -22,16 +22,17 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@agentic-os/core": "workspace:*",
+    "@clothos/core": "workspace:*",
     "ioredis": "^5.9.3",
+    "jose": "^6.1.3",
     "nats": "^2.29.3",
     "ws": "^8.19.0"
   },
   "optionalDependencies": {
-    "@agentic-os/ui": "workspace:*"
+    "@clothos/ui": "workspace:*"
   },
   "devDependencies": {
-    "@agentic-os/typescript-config": "workspace:*",
+    "@clothos/typescript-config": "workspace:*",
     "@types/node": "^22.19.11",
     "@types/ws": "^8.18.1",
     "tsup": "^8.5.1",

@@ -30,7 +30,7 @@ export { LLMService } from './llm-service.js';
 // Tool executor
 export { executeToolCall, buildToolHandlerMap } from './tool-executor.js';
 // Re-export ToolHandler/ToolHandlerMap from core for backward compatibility
-export type { ToolHandler, ToolHandlerMap } from '@agentic-os/core';
+export type { ToolHandler, ToolHandlerMap } from '@clothos/core';
 
 // Conversation context
 export { ConversationContext } from './conversation-context.js';

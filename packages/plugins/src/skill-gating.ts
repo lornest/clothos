@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { platform } from 'node:os';
-import type { Logger, SkillEntry } from '@agentic-os/core';
+import type { Logger, SkillEntry } from '@clothos/core';
 
 /** Check if a binary is available on the system PATH. */
 export function isBinaryAvailable(name: string): boolean {

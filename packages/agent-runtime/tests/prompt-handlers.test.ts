@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ToolDefinition, SkillEntry } from '@agentic-os/core';
+import type { ToolDefinition, SkillEntry } from '@clothos/core';
 import type { AssembledContext } from '../src/types.js';
 import { BootstrapLoader } from '../src/bootstrap-loader.js';
 import {

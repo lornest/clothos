@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Binding } from '@agentic-os/core';
+import type { Binding } from '@clothos/core';
 import type { AgentRegistryEntry, AgentRegistry } from '../src/agent-registry.js';
 import { AgentRouter } from '../src/agent-router.js';
 

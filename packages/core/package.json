@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-os/core",
+  "name": "@clothos/core",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -23,7 +23,7 @@
     "json5": "^2.2.3"
   },
   "devDependencies": {
-    "@agentic-os/typescript-config": "workspace:*",
+    "@clothos/typescript-config": "workspace:*",
     "@types/node": "^22.19.11",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

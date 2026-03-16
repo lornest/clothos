@@ -1,4 +1,4 @@
-import type { AgentMessage } from '@agentic-os/core';
+import type { AgentMessage } from '@clothos/core';
 import type { NatsClient } from './nats-client.js';
 
 export interface ParsedTarget {

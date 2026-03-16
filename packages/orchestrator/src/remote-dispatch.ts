@@ -1,12 +1,12 @@
-import type { AgentEvent, AgentMessage, AgentStatus } from '@agentic-os/core';
-import { generateId, now } from '@agentic-os/core';
+import type { AgentEvent, AgentMessage, AgentStatus } from '@clothos/core';
+import { generateId, now } from '@clothos/core';
 import type { AgentRegistryEntry } from './agent-registry.js';
 import { AsyncEventQueue } from './async-event-queue.js';
 
 /**
- * Transport abstraction so `@agentic-os/orchestrator` stays free of
+ * Transport abstraction so `@clothos/orchestrator` stays free of
  * the `nats` npm dependency. The concrete implementation (wrapping
- * NatsClient) is assembled in `@agentic-os/app`.
+ * NatsClient) is assembled in `@clothos/app`.
  */
 export interface RemoteDispatchTransport {
   /** JetStream publish to an agent inbox (durable). */

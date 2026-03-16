@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { executeToolCall, buildToolHandlerMap } from '../src/tool-executor.js';
 import type { ToolHandler } from '../src/tool-executor.js';
-import type { ToolDefinition } from '@agentic-os/core';
+import type { ToolDefinition } from '@clothos/core';
 
 describe('executeToolCall', () => {
   it('executes a tool and returns success result', async () => {

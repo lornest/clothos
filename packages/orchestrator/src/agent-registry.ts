@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentStatus } from '@agentic-os/core';
+import type { AgentEvent, AgentStatus } from '@clothos/core';
 
 /** A single entry in the agent registry. */
 export interface AgentRegistryEntry {

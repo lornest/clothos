@@ -4,7 +4,7 @@ import { NullEmbeddingProvider } from '../src/embedding-provider.js';
 import { HeuristicImportanceScorer } from '../src/importance-scorer.js';
 import { createMemoryFlushHandler } from '../src/memory-flush-handler.js';
 import { createTestDbPath, cleanupTestDb, testMemoryConfig } from './helpers.js';
-import type { Message } from '@agentic-os/core';
+import type { Message } from '@clothos/core';
 
 let store: EpisodicMemoryStore;
 let dbPath: string;

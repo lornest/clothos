@@ -4,7 +4,7 @@ import type {
   SandboxConfig,
   ToolDefinition,
   ToolsConfig,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import type { ToolRegistry } from './registry.js';
 import { expandGroups } from './tool-groups.js';
 

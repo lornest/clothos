@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ResponseRouter } from '../src/response-router.js';
-import type { AgentMessage } from '@agentic-os/core';
-import { generateId, now } from '@agentic-os/core';
+import type { AgentMessage } from '@clothos/core';
+import { generateId, now } from '@clothos/core';
 
 function createTestMessage(overrides?: Partial<AgentMessage>): AgentMessage {
   return {

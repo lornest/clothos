@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ToolRegistry } from '../src/registry.js';
 import { ToolConflictError } from '../src/errors.js';
-import type { ToolDefinition, ToolHandler } from '@agentic-os/core';
+import type { ToolDefinition, ToolHandler } from '@clothos/core';
 
 /** Helper to create a minimal valid ToolDefinition. */
 function makeDef(name: string, description = `Tool ${name}`): ToolDefinition {

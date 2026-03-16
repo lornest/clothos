@@ -75,7 +75,7 @@ export type {
 
 // Configuration
 export type {
-  AgenticOsConfig,
+  ClothosConfig,
   GatewayConfig,
   AgentsConfig,
   AgentDefaults,

@@ -1,5 +1,5 @@
-import type { Message } from '@agentic-os/core';
-import { generateId, now } from '@agentic-os/core';
+import type { Message } from '@clothos/core';
+import { generateId, now } from '@clothos/core';
 import { chunkText, estimateTokens } from './chunker.js';
 import type { ImportanceScorer } from './importance-scorer.js';
 import type { EpisodicMemoryStore } from './memory-store.js';

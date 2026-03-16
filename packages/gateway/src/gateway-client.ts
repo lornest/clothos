@@ -1,10 +1,12 @@
 import { WebSocket } from 'ws';
-import type { AgentMessage, GatewayTransport, Logger } from '@agentic-os/core';
+import type { AgentMessage, GatewayTransport, Logger } from '@clothos/core';
 
 export interface GatewayClientOptions {
   /** WebSocket URL, e.g. ws://localhost:18789/ws */
   url: string;
-  /** Shared-secret token for authentication. */
+  /** API key — exchanged for a JWT via POST /auth/token before connecting. */
+  apiKey?: string;
+  /** Raw auth token (legacy shared secret). Used directly if apiKey is not set. */
   authToken?: string;
   /** Auto-reconnect on disconnect. Default: true. */
   reconnect?: boolean;
@@ -22,17 +24,22 @@ export class GatewayClient implements GatewayTransport {
   private ws: WebSocket | null = null;
   private readonly responseHandlers = new Map<string, (msg: AgentMessage) => void>();
   private readonly url: string;
+  private readonly apiKey: string | undefined;
   private readonly authToken: string | undefined;
   private readonly shouldReconnect: boolean;
   private readonly maxReconnectDelayMs: number;
   private readonly logger: Logger | undefined;
 
+  private jwt: string | null = null;
+  private jwtExpiresIn = 0;
+  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectAttempt = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private closing = false;
 
   constructor(options: GatewayClientOptions) {
     this.url = options.url;
+    this.apiKey = options.apiKey;
     this.authToken = options.authToken;
     this.shouldReconnect = options.reconnect ?? true;
     this.maxReconnectDelayMs = options.maxReconnectDelayMs ?? 30_000;
@@ -41,6 +48,9 @@ export class GatewayClient implements GatewayTransport {
 
   async connect(): Promise<void> {
     this.closing = false;
+    if (this.apiKey) {
+      await this.acquireToken();
+    }
     return this.doConnect();
   }
 
@@ -49,6 +59,10 @@ export class GatewayClient implements GatewayTransport {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
+    }
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
     }
     if (this.ws) {
       const ws = this.ws;
@@ -73,10 +87,65 @@ export class GatewayClient implements GatewayTransport {
     this.responseHandlers.delete(correlationId);
   }
 
+  /** Derive the HTTP base URL from the WebSocket URL. */
+  private getHttpBaseUrl(): string {
+    const wsUrl = new URL(this.url);
+    wsUrl.protocol = wsUrl.protocol === 'wss:' ? 'https:' : 'http:';
+    // Remove the /ws path to get the server root
+    wsUrl.pathname = '';
+    return wsUrl.origin;
+  }
+
+  /** Exchange API key for a JWT via POST /auth/token. */
+  private async acquireToken(): Promise<void> {
+    const baseUrl = this.getHttpBaseUrl();
+    const res = await fetch(`${baseUrl}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: this.apiKey }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Token acquisition failed (${res.status}): ${body}`);
+    }
+
+    const data = (await res.json()) as { token: string; expiresIn: number };
+    this.jwt = data.token;
+    this.jwtExpiresIn = data.expiresIn;
+    this.scheduleTokenRefresh();
+  }
+
+  /** Schedule a token refresh at 80% of the expiry time. */
+  private scheduleTokenRefresh(): void {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+    if (!this.apiKey || this.jwtExpiresIn <= 0) return;
+
+    const refreshMs = this.jwtExpiresIn * 1000 * 0.8;
+    this.refreshTimer = setTimeout(() => {
+      this.refreshTimer = null;
+      this.acquireToken().catch((err) => {
+        this.logger?.error(
+          `JWT refresh failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      });
+    }, refreshMs);
+    this.refreshTimer.unref?.();
+  }
+
+  private getAuthToken(): string | undefined {
+    // Prefer JWT from API key exchange; fall back to static authToken
+    return this.jwt ?? this.authToken;
+  }
+
   private doConnect(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const url = this.authToken
-        ? `${this.url}${this.url.includes('?') ? '&' : '?'}token=${encodeURIComponent(this.authToken)}`
+      const token = this.getAuthToken();
+      const url = token
+        ? `${this.url}${this.url.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
         : this.url;
 
       const ws = new WebSocket(url);
@@ -133,12 +202,16 @@ export class GatewayClient implements GatewayTransport {
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      this.doConnect().catch((err) => {
-        this.logger?.error(
-          `GatewayClient reconnect failed: ${err instanceof Error ? err.message : String(err)}`,
-        );
-        this.scheduleReconnect();
-      });
+      // Re-acquire token before reconnecting if using API key
+      const preConnect = this.apiKey ? this.acquireToken() : Promise.resolve();
+      preConnect
+        .then(() => this.doConnect())
+        .catch((err) => {
+          this.logger?.error(
+            `GatewayClient reconnect failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
+          this.scheduleReconnect();
+        });
     }, delay);
   }
 }

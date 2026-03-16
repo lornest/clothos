@@ -1,5 +1,5 @@
-import type { Message } from '@agentic-os/core';
-import { generateId, now } from '@agentic-os/core';
+import type { Message } from '@clothos/core';
+import { generateId, now } from '@clothos/core';
 import type { FileSystem, SessionEntry, SessionHeader, SessionLine } from './types.js';
 import { SessionCorruptError } from './errors.js';
 

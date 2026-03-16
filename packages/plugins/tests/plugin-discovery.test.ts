@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { Logger } from '@agentic-os/core';
+import type { Logger } from '@clothos/core';
 import { discoverPlugins } from '../src/plugin-discovery.js';
 
 function makeLogger(): Logger {
@@ -37,7 +37,7 @@ describe('discoverPlugins', () => {
       JSON.stringify({
         name: `@test/${name}`,
         version: '1.0.0',
-        agenticOs: {
+        clothos: {
           entry,
           manifest,
         },
@@ -64,7 +64,7 @@ describe('discoverPlugins', () => {
     expect(result).toHaveLength(0);
   });
 
-  it('skips packages without agenticOs field', async () => {
+  it('skips packages without clothos field', async () => {
     const pluginDir = join(tempDir, 'plain-pkg');
     await mkdir(pluginDir, { recursive: true });
     await writeFile(
@@ -139,7 +139,7 @@ describe('discoverPlugins', () => {
         JSON.stringify({
           name: '@test/plugin-b',
           version: '1.0.0',
-          agenticOs: {
+          clothos: {
             entry: 'dist/index.js',
             manifest: { name: 'plugin-b', version: '1.0.0', description: 'B' },
           },

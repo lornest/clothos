@@ -8,9 +8,9 @@ import type {
   Message,
   SkillEntry,
   ToolDefinition,
-} from '@agentic-os/core';
-import { now } from '@agentic-os/core';
-import type { NatsClient, Subscription } from '@agentic-os/gateway';
+} from '@clothos/core';
+import { now } from '@clothos/core';
+import type { NatsClient, Subscription } from '@clothos/gateway';
 import { agentLoop } from './agent-loop.js';
 import { ContextCompactor } from './context-compactor.js';
 import { ConversationContext } from './conversation-context.js';
@@ -322,13 +322,6 @@ export class AgentManager {
           ? (data['sessionId'] as string | undefined)
           : undefined
       ) ?? undefined;
-
-      // When no explicit sessionId is provided, reset context so each
-      // task.request gets a fresh conversation (no history bleed).
-      if (!sessionId) {
-        this.context = null;
-        this.currentSessionId = null;
-      }
 
       console.log(`[INBOX] ${this.agentId} dispatching: "${userMessage.slice(0, 80)}..." (status: ${this.status})`);
       try {

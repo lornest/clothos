@@ -1,5 +1,5 @@
-import type { ToolDefinition } from '@agentic-os/core';
-import type { ToolHandler } from '@agentic-os/agent-runtime';
+import type { ToolDefinition } from '@clothos/core';
+import type { ToolHandler } from '@clothos/agent-runtime';
 import type { EpisodicMemoryStore } from './memory-store.js';
 import type { EmbeddingProvider, SearchResult, SourceType } from './types.js';
 

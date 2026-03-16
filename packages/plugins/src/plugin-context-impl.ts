@@ -7,7 +7,7 @@ import type {
   PluginContext,
   ToolDefinition,
   ToolHandler,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import type { PluginLoaderCallbacks } from './types.js';
 
 export interface PluginContextResult {

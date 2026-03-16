@@ -1,5 +1,5 @@
 {
-  "name": "agentic-os",
+  "name": "clothos",
   "private": true,
   "packageManager": "pnpm@10.28.2",
   "engines": {
@@ -20,10 +20,13 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "better-sqlite3"
-    ]
+    ],
+    "patchedDependencies": {
+      "@whiskeysockets/baileys@6.17.16": "patches/@whiskeysockets__baileys@6.17.16.patch"
+    }
   },
   "devDependencies": {
-    "@agentic-os/agent-runtime": "workspace:*",
+    "@clothos/agent-runtime": "workspace:*",
     "knip": "^5.84.1",
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",

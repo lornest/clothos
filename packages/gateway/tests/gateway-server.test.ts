@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { GatewayServer } from '../src/gateway-server.js';
-import type { GatewayConfig } from '@agentic-os/core';
+import type { GatewayConfig } from '@clothos/core';
 import type { Subscription } from '../src/types.js';
+import { verifyToken } from '../src/jwt.js';
 
 // Mock all dependencies using class-based mocks
 vi.mock('../src/nats-client.js', () => ({
@@ -146,5 +147,93 @@ describe('GatewayServer', () => {
   it('constructs with UI config', () => {
     const serverWithUi = new GatewayServer(testConfigWithUi);
     expect(serverWithUi).toBeDefined();
+  });
+
+  it('registers a service key', () => {
+    server.registerServiceKey('channels', 'test-key-123');
+    // No error means success — we verify via the token endpoint in integration tests
+  });
+});
+
+describe('GatewayServer POST /auth/token', () => {
+  let server: GatewayServer;
+  const port = 0; // Let OS assign a free port
+  let actualPort: number;
+
+  const tokenConfig: GatewayConfig = {
+    nats: { url: 'nats://localhost:4222' },
+    redis: { url: 'redis://localhost:6379' },
+    websocket: {
+      port,
+      allowAnonymous: true,
+      jwtSecret: 'test-jwt-secret-for-token-endpoint',
+    },
+    maxConcurrentAgents: 10,
+  };
+
+  beforeAll(async () => {
+    vi.clearAllMocks();
+    server = new GatewayServer(tokenConfig);
+    await server.start();
+    // Extract the OS-assigned port
+    const addr = (server as unknown as { httpServer: { address: () => { port: number } } }).httpServer.address();
+    actualPort = addr.port;
+    server.registerServiceKey('channels', 'my-api-key');
+  });
+
+  afterAll(async () => {
+    await server.stop();
+  });
+
+  it('returns a JWT for a valid service key', async () => {
+    const res = await fetch(`http://localhost:${actualPort}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'my-api-key' }),
+    });
+
+    expect(res.status).toBe(200);
+    const data = (await res.json()) as { token: string; expiresIn: number };
+    expect(data.token).toBeDefined();
+    expect(data.expiresIn).toBe(3600);
+
+    // Verify the JWT is valid
+    const payload = await verifyToken(data.token, 'test-jwt-secret-for-token-endpoint');
+    expect(payload).not.toBeNull();
+    expect(payload!.sub).toBe('channels');
+  });
+
+  it('returns 401 for an invalid API key', async () => {
+    const res = await fetch(`http://localhost:${actualPort}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'wrong-key' }),
+    });
+
+    expect(res.status).toBe(401);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toBe('Invalid API key');
+  });
+
+  it('returns 400 for missing key field', async () => {
+    const res = await fetch(`http://localhost:${actualPort}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+
+    expect(res.status).toBe(400);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toBe('Missing "key" field');
+  });
+
+  it('returns 400 for invalid JSON body', async () => {
+    const res = await fetch(`http://localhost:${actualPort}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'not json',
+    });
+
+    expect(res.status).toBe(400);
   });
 });

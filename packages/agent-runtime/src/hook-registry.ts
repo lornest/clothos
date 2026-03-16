@@ -1,4 +1,4 @@
-import type { Disposable, HookHandler, LifecycleEvent } from '@agentic-os/core';
+import type { Disposable, HookHandler, LifecycleEvent } from '@clothos/core';
 import type { HookEntry } from './types.js';
 import { HookBlockError } from './errors.js';
 

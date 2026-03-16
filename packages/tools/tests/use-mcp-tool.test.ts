@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { PolicyContext } from '@agentic-os/core';
+import type { PolicyContext } from '@clothos/core';
 import { createUseMcpToolHandler } from '../src/mcp/use-mcp-tool.js';
 
 // ── Mock types ────────────────────────────────────────────────────────

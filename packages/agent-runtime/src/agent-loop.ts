@@ -3,7 +3,7 @@ import type {
   AgentLoopOptions,
   CompletionOptions,
   ToolDefinition,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import type { ConversationContext } from './conversation-context.js';
 import type { HookRegistry } from './hook-registry.js';
 import type { LLMService } from './llm-service.js';

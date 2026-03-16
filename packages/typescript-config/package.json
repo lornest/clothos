@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-os/typescript-config",
+  "name": "@clothos/typescript-config",
   "version": "0.0.0",
   "private": true,
   "files": [

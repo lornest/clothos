@@ -1,4 +1,4 @@
-import type { DockerConfig } from '@agentic-os/core';
+import type { DockerConfig } from '@clothos/core';
 import { SandboxError } from '../errors.js';
 import { dockerCreate, dockerExec, dockerInfo, dockerRemove, dockerStart } from './docker-cli.js';
 

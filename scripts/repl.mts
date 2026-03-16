@@ -6,8 +6,8 @@ import {
   LLMService,
   PiMonoProvider,
   getModel,
-} from '@agentic-os/agent-runtime';
-import type { FileSystem } from '@agentic-os/agent-runtime';
+} from '@clothos/agent-runtime';
+import type { FileSystem } from '@clothos/agent-runtime';
 
 // --- Configuration via env vars ---
 const PROVIDER = process.env['REPL_PROVIDER'] ?? 'anthropic';
@@ -15,7 +15,7 @@ const MODEL_ID = process.env['REPL_MODEL'] ?? 'claude-sonnet-4-20250514';
 const PERSONA = process.env['REPL_PERSONA'] ?? 'You are a helpful assistant.';
 const BASE_PATH =
   process.env['REPL_BASE_PATH'] ??
-  path.join(process.env['HOME'] ?? '~', '.agentic-os');
+  path.join(process.env['HOME'] ?? '~', '.clothos');
 
 // --- FileSystem adapter wrapping node:fs/promises ---
 function createNodeFs(): FileSystem {

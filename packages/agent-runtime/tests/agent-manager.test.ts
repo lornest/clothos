@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { AgentEvent, LLMProvider, Message, StreamChunk } from '@agentic-os/core';
+import type { AgentEvent, LLMProvider, Message, StreamChunk } from '@clothos/core';
 import { AgentManager } from '../src/agent-manager.js';
 import { LLMService } from '../src/llm-service.js';
 import { InvalidStateTransitionError } from '../src/errors.js';

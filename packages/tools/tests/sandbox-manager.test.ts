@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { DockerConfig } from '@agentic-os/core';
+import type { DockerConfig } from '@clothos/core';
 
 // Mock the docker-cli module before importing SandboxManager
 vi.mock('../src/sandbox/docker-cli.js', () => ({
@@ -27,7 +27,7 @@ const mockDockerRemove = vi.mocked(dockerRemove);
 const mockDockerInfo = vi.mocked(dockerInfo);
 
 const testConfig: DockerConfig = {
-  image: 'agentic-os-sandbox:latest',
+  image: 'clothos-sandbox:latest',
   memoryLimit: '512m',
   cpuLimit: '1.0',
   pidsLimit: 100,

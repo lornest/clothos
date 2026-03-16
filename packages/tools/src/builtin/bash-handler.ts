@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import type { ToolHandler } from '@agentic-os/core';
+import type { ToolHandler } from '@clothos/core';
 import { classifyCommandRisk, sanitizeArguments } from './risk-classifier.js';
 
 export interface BashHandlerOptions {

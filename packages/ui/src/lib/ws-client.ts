@@ -1,4 +1,4 @@
-/** Shape matching AgentMessage from @agentic-os/core. */
+/** Shape matching AgentMessage from @clothos/core. */
 export interface AgentMessage {
   id: string;
   specversion: '1.0';

@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
-import { generateId, now } from '@agentic-os/core';
-import type { AgentMessage } from '@agentic-os/core';
+import { generateId, now } from '@clothos/core';
+import type { AgentMessage } from '@clothos/core';
 
 interface WsClientOptions {
   port: number;

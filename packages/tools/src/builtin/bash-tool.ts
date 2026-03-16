@@ -1,4 +1,4 @@
-import type { ToolDefinition } from '@agentic-os/core';
+import type { ToolDefinition } from '@clothos/core';
 
 export const bashToolDefinition: ToolDefinition = {
   name: 'bash',

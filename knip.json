@@ -13,6 +13,7 @@
     "packages/orchestrator": {},
     "packages/channels": {},
     "packages/channels-telegram": {},
+    "packages/channels-whatsapp": {},
     "packages/ui": {},
     "packages/app": {
       "entry": ["tests/**/*.test.ts"]

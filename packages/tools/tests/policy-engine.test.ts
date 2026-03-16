@@ -8,7 +8,7 @@ import type {
   ToolDefinition,
   ToolHandler,
   ToolsConfig,
-} from '@agentic-os/core';
+} from '@clothos/core';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -27,7 +27,7 @@ const defaultSandbox: SandboxConfig = {
   mode: 'off',
   scope: 'session',
   docker: {
-    image: 'agentic-os-sandbox:latest',
+    image: 'clothos-sandbox:latest',
     memoryLimit: '512m',
     cpuLimit: '1.0',
     pidsLimit: 100,

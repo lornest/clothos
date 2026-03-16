@@ -2,8 +2,8 @@ import type { ChannelsConfig } from './channels.js';
 import type { OrchestratorConfig } from './orchestration.js';
 import type { SkillsConfig } from './skills.js';
 
-/** Top-level configuration schema for the Agentic OS. */
-export interface AgenticOsConfig {
+/** Top-level configuration schema for the ClothOS. */
+export interface ClothosConfig {
   gateway: GatewayConfig;
   agents: AgentsConfig;
   bindings: Binding[];
@@ -66,6 +66,10 @@ export interface GatewayConfig {
     allowAnonymous?: boolean;
     /** Shared secret for token auth. Clients must send this as Bearer token. */
     sharedSecret?: string;
+    /** HMAC secret for signing JWT session tokens. Auto-generated if not set. */
+    jwtSecret?: string;
+    /** JWT lifetime in ms. Default: 1 hour (3_600_000). */
+    tokenExpiryMs?: number;
     /** TTL for pending responses / listeners (ms). Defaults to 10 minutes. */
     responseTtlMs?: number;
   };

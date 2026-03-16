@@ -1,6 +1,6 @@
 import JSON5 from 'json5';
 import { readFileSync } from 'node:fs';
-import type { AgenticOsConfig } from './config.js';
+import type { ClothosConfig } from './config.js';
 import { isRecord } from './utils.js';
 
 /** Sections that must exist at the top level of the config. */
@@ -27,7 +27,7 @@ export interface ConfigValidationError {
 export interface ConfigValidationResult {
   valid: boolean;
   errors: ConfigValidationError[];
-  config?: AgenticOsConfig;
+  config?: ClothosConfig;
 }
 
 /**
@@ -92,7 +92,6 @@ export function validateConfig(json5String: string): ConfigValidationResult {
     if (!isRecord(websocket)) {
       errors.push({ path: 'gateway.websocket', message: 'Expected object' });
     } else {
-      const allowAnonymous = websocket.allowAnonymous ?? false;
       if (!isNumber(websocket.port)) {
         errors.push({ path: 'gateway.websocket.port', message: 'Expected number' });
       }
@@ -102,11 +101,11 @@ export function validateConfig(json5String: string): ConfigValidationResult {
       if (websocket.sharedSecret !== undefined && !isString(websocket.sharedSecret)) {
         errors.push({ path: 'gateway.websocket.sharedSecret', message: 'Expected string' });
       }
-      if (!allowAnonymous && !isString(websocket.sharedSecret)) {
-        errors.push({
-          path: 'gateway.websocket.sharedSecret',
-          message: 'Required when allowAnonymous is false',
-        });
+      if (websocket.jwtSecret !== undefined && !isString(websocket.jwtSecret)) {
+        errors.push({ path: 'gateway.websocket.jwtSecret', message: 'Expected string' });
+      }
+      if (websocket.tokenExpiryMs !== undefined && !isNumber(websocket.tokenExpiryMs)) {
+        errors.push({ path: 'gateway.websocket.tokenExpiryMs', message: 'Expected number' });
       }
       if (websocket.responseTtlMs !== undefined && !isNumber(websocket.responseTtlMs)) {
         errors.push({ path: 'gateway.websocket.responseTtlMs', message: 'Expected number' });
@@ -225,7 +224,7 @@ export function validateConfig(json5String: string): ConfigValidationResult {
   return {
     valid: errors.length === 0,
     errors,
-    config: errors.length === 0 ? (parsed as unknown as AgenticOsConfig) : undefined,
+    config: errors.length === 0 ? (parsed as unknown as ClothosConfig) : undefined,
   };
 }
 

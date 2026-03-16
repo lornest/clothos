@@ -1,6 +1,6 @@
-import type { AgentMessage } from '@agentic-os/core';
-import { generateId, now } from '@agentic-os/core';
-import type { GatewayWebSocketServer } from '@agentic-os/gateway';
+import type { AgentMessage } from '@clothos/core';
+import { generateId, now } from '@clothos/core';
+import type { GatewayWebSocketServer } from '@clothos/gateway';
 
 /**
  * Routes agent responses back to the originating WebSocket client.

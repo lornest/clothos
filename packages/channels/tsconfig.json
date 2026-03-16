@@ -1,5 +1,5 @@
 {
-  "extends": "@agentic-os/typescript-config/library.json",
+  "extends": "@clothos/typescript-config/library.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src"

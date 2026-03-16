@@ -4,7 +4,7 @@ import type {
   ToolHandlerMap,
   ToolRegistryEntry,
   ToolSource,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import { ToolConflictError } from './errors.js';
 
 /**

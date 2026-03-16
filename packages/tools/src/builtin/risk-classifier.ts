@@ -1,4 +1,4 @@
-import type { RiskLevel } from '@agentic-os/core';
+import type { RiskLevel } from '@clothos/core';
 
 export interface RiskAssessment {
   level: RiskLevel;

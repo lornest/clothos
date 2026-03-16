@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import type { Logger, PluginManifest } from '@agentic-os/core';
+import type { Logger, PluginManifest } from '@clothos/core';
 import type { DiscoveredPlugin } from './types.js';
 
 /**
@@ -19,7 +19,7 @@ function isPluginEnabled(
 
 /**
  * Parses a plugin's package.json to extract its manifest and entry path.
- * Returns null if the package.json doesn't contain an `agenticOs` field.
+ * Returns null if the package.json doesn't contain an `clothos` field.
  */
 async function parsePluginManifest(
   pluginDir: string,
@@ -39,16 +39,16 @@ async function parsePluginManifest(
     return null;
   }
 
-  const agenticOs = pkg['agenticOs'] as
+  const clothos = pkg['clothos'] as
     | { entry?: string; manifest?: PluginManifest }
     | undefined;
 
-  if (!agenticOs?.manifest) return null;
+  if (!clothos?.manifest) return null;
 
-  const entryPath = resolve(pluginDir, agenticOs.entry ?? 'dist/index.js');
+  const entryPath = resolve(pluginDir, clothos.entry ?? 'dist/index.js');
 
   return {
-    manifest: agenticOs.manifest,
+    manifest: clothos.manifest,
     entryPath,
     directory: pluginDir,
   };
@@ -56,7 +56,7 @@ async function parsePluginManifest(
 
 /**
  * Discovers plugins by scanning directories for subdirectories
- * containing package.json files with an `agenticOs` field.
+ * containing package.json files with an `clothos` field.
  */
 export async function discoverPlugins(
   directories: string[],

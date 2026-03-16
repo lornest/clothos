@@ -5,7 +5,7 @@ import type {
   ChannelAdaptorStatus,
   InboundMessage,
   OutboundMessage,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import { Bot } from 'grammy';
 
 /** Maximum Telegram message length. */

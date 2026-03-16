@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Binding } from '@agentic-os/core';
+import type { Binding } from '@clothos/core';
 import { resolveAgent } from '../src/binding-resolver.js';
 
 const bindings: Binding[] = [

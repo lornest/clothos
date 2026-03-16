@@ -8,7 +8,7 @@ import { readDailyLog, listDailyLogs, appendDailyLog } from '../src/daily-log.js
 let testDir: string;
 
 beforeEach(() => {
-  testDir = join(tmpdir(), 'agentic-os-test', randomUUID());
+  testDir = join(tmpdir(), 'clothos-test', randomUUID());
   mkdirSync(join(testDir, 'memory'), { recursive: true });
 });
 

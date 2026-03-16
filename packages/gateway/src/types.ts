@@ -1,4 +1,4 @@
-import type { AgentMessage } from '@agentic-os/core';
+import type { AgentMessage } from '@clothos/core';
 
 /** Circuit breaker states. */
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { McpServerConfig } from '@agentic-os/core';
+import type { McpServerConfig } from '@clothos/core';
 import type { McpToolInfo } from '../src/mcp/mcp-client-connection.js';
 
 // Shared map that each test configures before calling connectAll.

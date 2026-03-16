@@ -1,8 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import type { FileSystem } from '@agentic-os/agent-runtime';
-import type { Logger } from '@agentic-os/core';
-import { PiMonoProvider, getModel } from '@agentic-os/agent-runtime';
+import type { FileSystem } from '@clothos/agent-runtime';
+import type { Logger } from '@clothos/core';
+import { PiMonoProvider, getModel } from '@clothos/agent-runtime';
 import { bootstrap } from './bootstrap.js';
 
 function createNodeFs(): FileSystem {
@@ -43,17 +43,17 @@ function createLogger(): Logger {
 }
 
 async function main(): Promise<void> {
-  const configPath = process.env['AGENTIC_OS_CONFIG']
+  const configPath = process.env['CLOTHOS_CONFIG']
     ?? path.resolve(process.cwd(), 'config/default.json5');
-  const basePath = process.env['AGENTIC_OS_BASE']
-    ?? path.join(process.env['HOME'] ?? '~', '.agentic-os');
+  const basePath = process.env['CLOTHOS_BASE']
+    ?? path.join(process.env['HOME'] ?? '~', '.clothos');
 
   const logger = createLogger();
   const nodeFs = createNodeFs();
 
   // Set up LLM provider
-  const provider = process.env['AGENTIC_OS_PROVIDER'] ?? 'anthropic';
-  const modelId = process.env['AGENTIC_OS_MODEL'] ?? 'claude-sonnet-4-20250514';
+  const provider = process.env['CLOTHOS_PROVIDER'] ?? 'anthropic';
+  const modelId = process.env['CLOTHOS_MODEL'] ?? 'claude-sonnet-4-20250514';
 
   const model = getModel(provider as Parameters<typeof getModel>[0], modelId as Parameters<typeof getModel>[1]);
   const llmProvider = new PiMonoProvider({ model, id: 'pi-mono' });
@@ -75,7 +75,7 @@ async function main(): Promise<void> {
   process.on('SIGINT', handleShutdown);
   process.on('SIGTERM', handleShutdown);
 
-  logger.info(`Agentic OS running — WebSocket on port ${app.config.gateway.websocket.port}`);
+  logger.info(`ClothOS running — WebSocket on port ${app.config.gateway.websocket.port}`);
 }
 
 main().catch((err) => {

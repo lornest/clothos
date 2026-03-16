@@ -40,3 +40,7 @@ export { GatewayServer } from './gateway-server.js';
 // Gateway client (WebSocket client for channel adaptors)
 export { GatewayClient } from './gateway-client.js';
 export type { GatewayClientOptions } from './gateway-client.js';
+
+// JWT utilities
+export { signToken, verifyToken } from './jwt.js';
+export type { TokenPayload } from './jwt.js';

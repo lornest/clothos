@@ -1,4 +1,4 @@
-import type { HookHandler } from '@agentic-os/core';
+import type { HookHandler } from '@clothos/core';
 
 /** Message shape used in the assembled context. */
 interface AssembledMessage {

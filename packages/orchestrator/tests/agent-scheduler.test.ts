@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { AgentScheduler } from '../src/agent-scheduler.js';
 import type { DispatchFn } from '../src/agent-scheduler.js';
-import type { AgentEvent, ScheduledTask } from '@agentic-os/core';
-import { TaskPriority } from '@agentic-os/core';
+import type { AgentEvent, ScheduledTask } from '@clothos/core';
+import { TaskPriority } from '@clothos/core';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 

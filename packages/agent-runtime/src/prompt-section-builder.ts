@@ -1,4 +1,4 @@
-import type { ToolDefinition, SkillEntry } from '@agentic-os/core';
+import type { ToolDefinition, SkillEntry } from '@clothos/core';
 import type { BootstrapFile } from './prompt-types.js';
 
 /** Wraps content in XML-style section tags. */

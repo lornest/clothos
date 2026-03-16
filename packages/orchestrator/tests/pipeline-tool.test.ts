@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { AgentEvent } from '@agentic-os/core';
+import type { AgentEvent } from '@clothos/core';
 import type { AgentRegistry, AgentRegistryEntry } from '../src/agent-registry.js';
 import { createPipelineHandler, pipelineToolDefinition } from '../src/tools/pipeline-tool.js';
 

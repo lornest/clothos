@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NatsClient } from '../src/nats-client.js';
-import type { AgentMessage } from '@agentic-os/core';
+import type { AgentMessage } from '@clothos/core';
 
 function makeMsg(overrides: Partial<AgentMessage> = {}): AgentMessage {
   return {

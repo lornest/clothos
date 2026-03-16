@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { AgentMessage, InboundMessage } from '@agentic-os/core';
+import type { AgentMessage, InboundMessage } from '@clothos/core';
 import { buildAgentMessage, buildOutboundMessage } from '../src/message-builder.js';
 
 describe('buildAgentMessage', () => {

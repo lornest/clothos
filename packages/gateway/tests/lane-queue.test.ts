@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { LaneQueue } from '../src/lane-queue.js';
-import type { AgentMessage } from '@agentic-os/core';
+import type { AgentMessage } from '@clothos/core';
 
 function makeMsg(id: string): AgentMessage {
   return {

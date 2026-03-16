@@ -5,7 +5,7 @@ import type {
   StreamChunk,
   ToolCall,
   ToolDefinition,
-} from '@agentic-os/core';
+} from '@clothos/core';
 
 export interface MockResponse {
   text: string;

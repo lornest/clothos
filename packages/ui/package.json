@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-os/ui",
+  "name": "@clothos/ui",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -21,7 +21,7 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@agentic-os/typescript-config": "workspace:*",
+    "@clothos/typescript-config": "workspace:*",
     "@tailwindcss/vite": "^4.1.8",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",

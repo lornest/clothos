@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { createServer, type Server } from 'node:http';
 import { WebSocketServer, WebSocket } from 'ws';
-import type { AgentMessage } from '@agentic-os/core';
+import type { AgentMessage } from '@clothos/core';
 import { GatewayClient } from '../src/gateway-client.js';
+import { signToken } from '../src/jwt.js';
 
 function makeMsg(overrides: Partial<AgentMessage> = {}): AgentMessage {
   return {
@@ -189,5 +191,116 @@ describe('GatewayClient', () => {
     // Reconnecting and sending a matching response should not trigger the old handler
     // (We verify indirectly: send throws because disconnected)
     await expect(client.send(makeMsg())).rejects.toThrow('not connected');
+  });
+});
+
+describe('GatewayClient JWT acquisition', () => {
+  let httpServer: Server;
+  let wss: WebSocketServer;
+  let httpPort: number;
+  let serverConnections: WebSocket[];
+  const JWT_SECRET = 'test-secret-for-client-jwt';
+
+  beforeEach(async () => {
+    serverConnections = [];
+
+    httpServer = createServer(async (req, res) => {
+      if (req.method === 'POST' && req.url === '/auth/token') {
+        let body = '';
+        req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+        req.on('end', () => {
+          void (async () => {
+            const parsed = JSON.parse(body) as { key?: string };
+            if (parsed.key === 'valid-key') {
+              const { token, expiresIn } = await signToken('channels', JWT_SECRET, 3_600_000);
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ token, expiresIn }));
+            } else {
+              res.writeHead(401, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Invalid API key' }));
+            }
+          })();
+        });
+        return;
+      }
+      res.writeHead(404);
+      res.end();
+    });
+
+    wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+    wss.on('connection', (ws) => {
+      serverConnections.push(ws);
+    });
+
+    await new Promise<void>((resolve) => {
+      httpServer.listen(0, resolve);
+    });
+    const addr = httpServer.address();
+    httpPort = typeof addr === 'object' && addr ? addr.port : 0;
+  });
+
+  afterEach(async () => {
+    for (const ws of serverConnections) {
+      ws.close();
+    }
+    wss.close();
+    await new Promise<void>((resolve, reject) => {
+      httpServer.close((err) => (err ? reject(err) : resolve()));
+    });
+  });
+
+  it('exchanges apiKey for JWT before connecting', async () => {
+    const receivedUrl = new Promise<string>((resolve) => {
+      wss.removeAllListeners('connection');
+      wss.on('connection', (ws, req) => {
+        serverConnections.push(ws);
+        resolve(req.url ?? '');
+      });
+    });
+
+    const client = new GatewayClient({
+      url: `ws://localhost:${httpPort}/ws`,
+      apiKey: 'valid-key',
+      reconnect: false,
+    });
+    await client.connect();
+
+    const url = await receivedUrl;
+    // The token query param should contain a JWT (has dots)
+    expect(url).toMatch(/token=.+\..+\..+/);
+
+    await client.disconnect();
+  });
+
+  it('throws when API key is invalid', async () => {
+    const client = new GatewayClient({
+      url: `ws://localhost:${httpPort}/ws`,
+      apiKey: 'invalid-key',
+      reconnect: false,
+    });
+
+    await expect(client.connect()).rejects.toThrow('Token acquisition failed');
+  });
+
+  it('falls back to authToken when apiKey is not set', async () => {
+    const receivedUrl = new Promise<string>((resolve) => {
+      wss.removeAllListeners('connection');
+      wss.on('connection', (ws, req) => {
+        serverConnections.push(ws);
+        resolve(req.url ?? '');
+      });
+    });
+
+    const client = new GatewayClient({
+      url: `ws://localhost:${httpPort}/ws`,
+      authToken: 'my-shared-secret',
+      reconnect: false,
+    });
+    await client.connect();
+
+    const url = await receivedUrl;
+    expect(url).toContain('token=my-shared-secret');
+
+    await client.disconnect();
   });
 });

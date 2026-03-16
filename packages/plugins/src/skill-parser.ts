@@ -1,6 +1,6 @@
 import { parse as parseYaml } from 'yaml';
 import { basename, dirname } from 'node:path';
-import type { SkillEntry, SkillMetadata } from '@agentic-os/core';
+import type { SkillEntry, SkillMetadata } from '@clothos/core';
 
 /**
  * Extract YAML frontmatter from a markdown string.

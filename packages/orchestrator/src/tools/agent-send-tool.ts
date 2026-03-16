@@ -1,4 +1,4 @@
-import type { ToolDefinition, ToolHandler } from '@agentic-os/core';
+import type { ToolDefinition, ToolHandler } from '@clothos/core';
 import type { AgentRegistry } from '../agent-registry.js';
 
 /** Tool definition for agent_send — send a message to another agent. */

@@ -7,7 +7,7 @@ import type {
   TokenUsage,
   ToolCall,
   ToolDefinition,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import type { LLMServiceOptions, ActiveBinding } from './types.js';
 import { LLMProviderUnavailableError } from './errors.js';
 

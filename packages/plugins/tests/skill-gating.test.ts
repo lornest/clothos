@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { Logger, SkillEntry } from '@agentic-os/core';
+import type { Logger, SkillEntry } from '@clothos/core';
 import {
   checkSkillRequirements,
   filterAvailableSkills,

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { parseTarget, MessageRouter } from '../src/router.js';
 import type { NatsClient } from '../src/nats-client.js';
-import type { AgentMessage } from '@agentic-os/core';
+import type { AgentMessage } from '@clothos/core';
 
 function makeMsg(target: string): AgentMessage {
   return {

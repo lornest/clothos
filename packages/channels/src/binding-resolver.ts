@@ -1,4 +1,4 @@
-import type { Binding, ResolvedBinding } from '@agentic-os/core';
+import type { Binding, ResolvedBinding } from '@clothos/core';
 
 /**
  * Resolves the best-matching agent for a given channel/sender/conversation

@@ -15,7 +15,7 @@ Establish the monorepo, define every shared type and interface that downstream p
 **Monorepo structure** using pnpm workspaces + Turborepo:
 
 ```
-agentic-os/
+clothos/
 ├── packages/
 │   ├── core/               # Shared types, interfaces, utilities
 │   ├── gateway/            # Central messaging gateway
@@ -70,9 +70,9 @@ packages:
 
 The `^` prefix in `dependsOn` means "run this task in my dependency packages first" — so `packages/gateway` (which depends on `packages/core`) will always see `core` built before its own build starts. Independent tasks like `lint` across packages run in parallel across all CPU cores.
 
-**Internal package references** use the pnpm workspace protocol. Every `package.json` that depends on `@agentic-os/core` declares:
+**Internal package references** use the pnpm workspace protocol. Every `package.json` that depends on `@clothos/core` declares:
 ```json
-{ "dependencies": { "@agentic-os/core": "workspace:*" } }
+{ "dependencies": { "@clothos/core": "workspace:*" } }
 ```
 pnpm links the local package during development and substitutes the real published version on `pnpm publish`.
 
@@ -242,7 +242,7 @@ Build the agent execution engine — the loop that calls the LLM, executes tools
 
 ### What we build
 
-**LLM abstraction layer** — define a provider-agnostic `LLMProvider` interface in `@agentic-os/core` that any backend must implement:
+**LLM abstraction layer** — define a provider-agnostic `LLMProvider` interface in `@clothos/core` that any backend must implement:
 
 ```typescript
 interface LLMProvider {
@@ -345,7 +345,7 @@ REGISTERED ──init()──→ INITIALIZING ──loaded──→ READY
 
 On `init()`: load agent config, allocate workspace directory, load persona files (`SOUL.md`, `AGENTS.md`, `USER.md`), bind to an LLM provider, restore snapshot if one exists. On `dispatch()`: pop a message from the agent's lane queue, set status to RUNNING, invoke the agent loop. On `suspend()`: serialize the `AgentSnapshot` (messages, loop iteration, pending tool calls, workspace git hash) to disk as JSON, set status to SUSPENDED. On `resume()`: deserialize the snapshot, restore context, set status to READY.
 
-**Session management** — each session is a JSONL file under `~/.agentic-os/sessions/{agentId}/{sessionId}.jsonl`. First line is the session header (ID, created timestamp, agent ID, channel). Subsequent lines are entries with `id`, `parentId` (for branching), `role`, `content`, and `timestamp`. Implement `createSession()`, `appendEntry()`, `getHistory()`, and `forkSession()`.
+**Session management** — each session is a JSONL file under `~/.clothos/sessions/{agentId}/{sessionId}.jsonl`. First line is the session header (ID, created timestamp, agent ID, channel). Subsequent lines are entries with `id`, `parentId` (for branching), `role`, `content`, and `timestamp`. Implement `createSession()`, `appendEntry()`, `getHistory()`, and `forkSession()`.
 
 **Context compaction** — when total tokens exceed `contextWindow - reserveTokens` (default reserve: 20,000):
 1. Fire `memory_flush` hook — triggers the memory subsystem (Phase 3) to persist durable state.
@@ -382,7 +382,7 @@ After comparing our original design against OpenClaw (SQLite-only, agent-initiat
 
 ### What we built
 
-**Package:** `packages/memory/` (`@agentic-os/memory`) — 13 source files, 83 tests across 9 test suites.
+**Package:** `packages/memory/` (`@clothos/memory`) — 13 source files, 83 tests across 9 test suites.
 
 **SQLite schema** — one database per agent. WAL mode + `busy_timeout=5000` for concurrency:
 
@@ -462,12 +462,12 @@ CREATE TABLE schema_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 
 ### Integration with existing code
 
-**No circular dependencies:** `@agentic-os/memory` depends on `@agentic-os/core` and `@agentic-os/agent-runtime`. Neither depends back on memory. Wiring happens at the application level via existing public APIs:
+**No circular dependencies:** `@clothos/memory` depends on `@clothos/core` and `@clothos/agent-runtime`. Neither depends back on memory. Wiring happens at the application level via existing public APIs:
 - `AgentManager.getHookRegistry()` → register `memory_flush` handler.
 - `AgentManager.setTools()` → add memory tools + handlers.
 
 **Files modified:**
-- `packages/core/src/config.ts` — added `MemoryConfig` interface and optional `memory?` field to `AgenticOsConfig`.
+- `packages/core/src/config.ts` — added `MemoryConfig` interface and optional `memory?` field to `ClothosConfig`.
 - `packages/core/src/config-validator.ts` — added `'memory'` to `VALID_TOP_LEVEL_KEYS` (separate from `REQUIRED_SECTIONS`).
 - `packages/core/src/index.ts` — exported `MemoryConfig` type.
 - `config/default.json5` — added `memory` section with defaults (embedding, search weights, chunking, importance scoring, daily log).
@@ -553,7 +553,7 @@ Build a secure, extensible tool execution layer with Docker sandboxing and MCP-b
 
 ### What we built
 
-**Package:** `packages/tools/` (`@agentic-os/tools`) — 22 source files, 108 tests across 11 test suites.
+**Package:** `packages/tools/` (`@clothos/tools`) — 22 source files, 108 tests across 11 test suites.
 
 **Core type extensions** (`packages/core/src/tools.ts`) — added types shared across packages:
 
@@ -687,7 +687,7 @@ Each layer can only remove tools from the set, never add ones denied by a parent
 
 ### Integration with existing code
 
-**No circular dependencies:** `@agentic-os/tools` depends on `@agentic-os/core` and `@modelcontextprotocol/sdk`. Neither `core` nor `agent-runtime` depends back on tools. Wiring happens at the application level via existing public APIs:
+**No circular dependencies:** `@clothos/tools` depends on `@clothos/core` and `@modelcontextprotocol/sdk`. Neither `core` nor `agent-runtime` depends back on tools. Wiring happens at the application level via existing public APIs:
 - `AgentManager.setTools()` — accepts `ToolDefinition[]` + `ToolHandlerMap` produced by `ToolRegistry.getDefinitions()` + `ToolRegistry.buildHandlerMap()`.
 - `AgentManager.getHookRegistry()` → register `context_assemble` handler for MCP catalog injection.
 
@@ -697,7 +697,7 @@ Each layer can only remove tools from the set, never add ones denied by a parent
 - `packages/agent-runtime/src/tool-executor.ts` — imports `ToolHandler`/`ToolHandlerMap` from core, re-exports.
 - `packages/agent-runtime/src/index.ts` — re-exports `ToolHandler`/`ToolHandlerMap` from core.
 - `packages/tools/package.json` — added `@modelcontextprotocol/sdk` dependency.
-- `knip.json` — removed `ignoreDependencies: ["@agentic-os/core"]` for tools workspace (now actively used).
+- `knip.json` — removed `ignoreDependencies: ["@clothos/core"]` for tools workspace (now actively used).
 
 **Dependencies:** `@modelcontextprotocol/sdk` (official MCP SDK). No other new dependencies.
 
@@ -731,7 +731,7 @@ Enable extensibility without modifying core code — plugins for deep system int
 
 ### Design decisions (simplified from original plan)
 
-- **`@agentic-os/plugins` depends only on `@agentic-os/core`** — receives HookRegistry, ToolRegistry, etc. via constructor-injected callbacks. No dependency on agent-runtime or tools packages. Application-level wiring connects them.
+- **`@clothos/plugins` depends only on `@clothos/core`** — receives HookRegistry, ToolRegistry, etc. via constructor-injected callbacks. No dependency on agent-runtime or tools packages. Application-level wiring connects them.
 - **`PluginContext.registerTool` gained a `handler` param** — changed from `registerTool(def: ToolDefinition): void` to `registerTool(def: ToolDefinition, handler: ToolHandler): void` so plugins can provide implementations alongside definitions.
 - **`SkillEntry` type added to core** — `formatSkillsSummary` and `createSkillsHandler` updated from `string[]` to `SkillEntry[]` (with `name`, `description`, `filePath`, `metadata`). The prompt section becomes `- skillName: description (path: filePath)` (~24 tokens/skill).
 - **New top-level `skills` config section** — separate from `plugins` config since skills and plugins have different lifecycles (files vs code modules).
@@ -741,12 +741,12 @@ Enable extensibility without modifying core code — plugins for deep system int
 
 ### What we built
 
-**Package:** `packages/plugins/` (`@agentic-os/plugins`) — 12 source files, 96 tests across 10 test suites.
+**Package:** `packages/plugins/` (`@clothos/plugins`) — 12 source files, 96 tests across 10 test suites.
 
 **Core type extensions** (`packages/core/src/`):
 - New `skills.ts` — `SkillEntry`, `SkillMetadata`, `SkillsConfig` types.
 - Updated `plugins.ts` — `registerTool` now accepts `(def: ToolDefinition, handler: ToolHandler)`.
-- Updated `config.ts` — added optional `skills?: SkillsConfig` to `AgenticOsConfig`.
+- Updated `config.ts` — added optional `skills?: SkillsConfig` to `ClothosConfig`.
 - Updated `config-validator.ts` — added `'skills'` to `VALID_TOP_LEVEL_KEYS`.
 - Updated `index.ts` — exported `SkillEntry`, `SkillMetadata`, `SkillsConfig`.
 
@@ -777,8 +777,8 @@ Enable extensibility without modifying core code — plugins for deep system int
 - Logger prefixed with `[plugin:{name}]`.
 
 **Plugin discovery** (`plugin-discovery.ts`):
-- Scans directories for subdirectories containing `package.json` with `agenticOs` field.
-- `agenticOs` field structure: `{ entry: string, manifest: PluginManifest }`.
+- Scans directories for subdirectories containing `package.json` with `clothos` field.
+- `clothos` field structure: `{ entry: string, manifest: PluginManifest }`.
 - `isPluginEnabled(name, enabled, disabled)` — disabled takes precedence; empty enabled = all.
 
 **Plugin loader** (`plugin-loader.ts`) — main orchestrator:
@@ -811,14 +811,14 @@ Enable extensibility without modifying core code — plugins for deep system int
 
 ### Integration with existing code
 
-**No circular dependencies:** `@agentic-os/plugins` depends only on `@agentic-os/core`. Application-level wiring connects plugins to the runtime via existing public APIs:
+**No circular dependencies:** `@clothos/plugins` depends only on `@clothos/core`. Application-level wiring connects plugins to the runtime via existing public APIs:
 - `AgentManager.setSkills()` → inject discovered skills into prompt handlers.
 - `AgentManager.getHookRegistry()` → pass to plugin context callbacks.
 - `AgentManager.setTools()` → register plugin-provided tools.
 
 **Files modified:**
 - `packages/core/src/plugins.ts` — `registerTool` signature adds `handler` param.
-- `packages/core/src/config.ts` — add `skills?: SkillsConfig` to `AgenticOsConfig`.
+- `packages/core/src/config.ts` — add `skills?: SkillsConfig` to `ClothosConfig`.
 - `packages/core/src/config-validator.ts` — add `'skills'` to `VALID_TOP_LEVEL_KEYS`.
 - `packages/core/src/index.ts` — export `SkillEntry`, `SkillMetadata`, `SkillsConfig`.
 - `packages/core/src/skills.ts` — new file with skill types.
@@ -866,7 +866,7 @@ Phases 0–5 built well-tested libraries, but no code connected them into a runn
 
 ### What we built
 
-**Package:** `packages/app/` (`@agentic-os/app`) — 4 source files, 7 unit tests + 6 E2E test files (Docker-dependent).
+**Package:** `packages/app/` (`@clothos/app`) — 4 source files, 7 unit tests + 6 E2E test files (Docker-dependent).
 
 **Application bootstrap** (`bootstrap.ts`) — the composition root that wires everything together:
 1. Loads and validates config from JSON5.
@@ -950,7 +950,7 @@ Phases 0–5 built well-tested libraries, but no code connected them into a runn
 
 ### Integration with existing code
 
-**No circular dependencies.** `@agentic-os/app` depends on all other packages (core, gateway, agent-runtime, memory, tools, plugins). No other package depends back on app. This is the composition root.
+**No circular dependencies.** `@clothos/app` depends on all other packages (core, gateway, agent-runtime, memory, tools, plugins). No other package depends back on app. This is the composition root.
 
 **Files modified:**
 - `packages/agent-runtime/src/agent-manager.ts` — enhanced `subscribeToInbox()`.
@@ -969,7 +969,7 @@ Phases 0–5 built well-tested libraries, but no code connected them into a runn
 - `turbo run test` — all 486 tests pass (479 existing + 7 new app unit tests).
 - `npx knip` — no unused exports or dependencies.
 - All existing package tests pass unchanged.
-- E2E tests (`pnpm -F @agentic-os/app test:e2e`) validate the full WS → NATS → agent → tools → memory → response path (requires Docker for NATS + Redis).
+- E2E tests (`pnpm -F @clothos/app test:e2e`) validate the full WS → NATS → agent → tools → memory → response path (requires Docker for NATS + Redis).
 - `pnpm start` boots the server with a real LLM provider.
 
 ---
@@ -991,11 +991,11 @@ Six changes shipped as a single refactoring pass:
 
 4. **Embedding auto-selection** — provider type expanded to `'auto' | 'openai' | 'none'`. New `resolveEmbeddingProvider(config)` auto-detects OpenAI when the API key env var is set, falls back to `NullEmbeddingProvider`. Default changed from `'openai'` to `'auto'`. Agent wiring uses the resolver instead of hardcoding `NullEmbeddingProvider`.
 
-5. **Env var config overrides** — `applyEnvOverrides(config)` reads `AGENTIC_OS_`-prefixed env vars and applies nested overrides (`__` separates levels). Type coercion for numbers and booleans. Called in `bootstrap.ts` after `loadConfig()`, kept separate from `validateConfig()` to avoid env pollution in tests.
+5. **Env var config overrides** — `applyEnvOverrides(config)` reads `CLOTHOS_`-prefixed env vars and applies nested overrides (`__` separates levels). Type coercion for numbers and booleans. Called in `bootstrap.ts` after `loadConfig()`, kept separate from `validateConfig()` to avoid env pollution in tests.
 
 6. **PolicyEngine binding layer** — `PolicyContext` gained `bindingTools?: { allow?: string[]; deny?: string[] }`. `resolveEffectivePolicy()` now resolves Global → Agent → Binding (3 layers). Binding allow intersects (can only narrow, never expand), binding deny stacks (additive). Threading binding overrides through the message handling path is Phase 6 wiring.
 
-### New types exported from `@agentic-os/core`
+### New types exported from `@clothos/core`
 
 - `BindingOverrides` — per-binding model/sandbox/tools/workspace overrides
 - `ResolvedBinding` — `{ agentId: string; binding: Binding }`
@@ -1006,7 +1006,7 @@ Six changes shipped as a single refactoring pass:
 
 - Phase 6: `resolveAgent()` already returns `ResolvedBinding` with the full binding including overrides. Wire `binding.overrides.tools` into `PolicyContext.bindingTools` during message dispatch. Use `binding.overrides.model` and `binding.overrides.sandbox` when configuring spawned agent sessions.
 - Phase 7: Policy engine already has 3 layers (Global → Agent → Binding). Session-level policy is the remaining layer. Full session-type taxonomy (`dm | group | spawn | cron`) is Phase 7 scope. Channel allowlist is already enforced.
-- Phase 8: Docker/CI deployments can override any config value via `AGENTIC_OS_*` env vars without editing config files. Embedding auto-detection reduces setup friction.
+- Phase 8: Docker/CI deployments can override any config value via `CLOTHOS_*` env vars without editing config files. Embedding auto-detection reduces setup friction.
 
 ### How to verify
 - `turbo run build` — 10/10 packages pass.
@@ -1032,14 +1032,14 @@ Support multiple agents running concurrently with configurable routing, cross-ag
 
 ### What we built
 
-**Package:** `packages/orchestrator/` (`@agentic-os/orchestrator`) — 11 source files, 68 tests across 8 test suites.
+**Package:** `packages/orchestrator/` (`@clothos/orchestrator`) — 11 source files, 68 tests across 8 test suites.
 
 **Core type extensions** (`packages/core/src/orchestration.ts`):
 - `TaskPriority` enum (`USER=1`, `DELEGATION=2`, `BACKGROUND=3`).
 - `ScheduledTask` — queued task with id, agentId, message, priority, enqueuedAt.
 - `AgentHealthInfo` — per-agent circuit state tracking.
 - `OrchestratorConfig` — `maxConcurrentAgents`, `spawnTimeoutMs`, `sendReplyTimeoutMs`, `maxExchanges`.
-- Added `orchestrator?: OrchestratorConfig` to `AgenticOsConfig`.
+- Added `orchestrator?: OrchestratorConfig` to `ClothosConfig`.
 - Added `'orchestration'` to `ToolSource` union.
 - Added `'orchestrator'` to config validator's `VALID_TOP_LEVEL_KEYS`.
 - Added `'group:orchestration': ['agent_spawn', 'agent_send']` to tool groups.
@@ -1242,7 +1242,7 @@ Storage: PostgreSQL table with triggers preventing UPDATE and DELETE. Chained ch
    - Tool-level permissions: each tool definition includes `requiredScopes[]`. The PDP checks `agent.scopes ⊇ tool.requiredScopes` before execution.
    - Delegation chain: when Agent A spawns Agent B, B's JWT includes a `delegation_chain` field and B's scopes are constrained to the intersection of A's allowed scopes and B's configured scopes (narrowing only). This aligns with the binding-level narrowing pattern already in the PolicyEngine.
 
-4. **Secrets management** — secrets from config are loaded into memory only, never passed as environment variables to sandboxed containers. API keys for LLM providers are resolved at the `LLMService` layer, never exposed to agent code. Sandboxed tools that need credentials use a `secrets_proxy` that injects auth headers server-side. Note: `applyEnvOverrides()` runs after config load — ensure sensitive env vars with the `AGENTIC_OS_` prefix cannot override auth credentials (add a deny-list for `auth__profiles__*__apikey` paths).
+4. **Secrets management** — secrets from config are loaded into memory only, never passed as environment variables to sandboxed containers. API keys for LLM providers are resolved at the `LLMService` layer, never exposed to agent code. Sandboxed tools that need credentials use a `secrets_proxy` that injects auth headers server-side. Note: `applyEnvOverrides()` runs after config load — ensure sensitive env vars with the `CLOTHOS_` prefix cannot override auth credentials (add a deny-list for `auth__profiles__*__apikey` paths).
 
 5. **Sandbox hardening** — upgrade the Docker sandbox with:
    - Per-binding sandbox overrides (`BindingOverrides.sandbox`) are already typed. Wire them into `SandboxManager` so public-facing bindings can enforce stricter limits than internal ones.
@@ -1259,7 +1259,7 @@ Storage: PostgreSQL table with triggers preventing UPDATE and DELETE. Chained ch
 - Shell security hardening: attempt obfuscated dangerous command (e.g., base64-encoded `rm -rf /`); verify blocked. Attempt `LD_PRELOAD=/evil.so ls`; verify env injection blocked. Enable allowlist mode; verify unlisted commands are rejected.
 - Session-level policy: create a `spawn` session with narrowed tools. Verify the child session cannot access tools denied at the session level. Verify `cron` sessions respect their default tool restrictions.
 - Delegation: Agent A (scopes: `["bash", "read", "write"]`) spawns Agent B (configured scopes: `["bash", "web"]`). Verify B's effective scopes are `["bash"]` (intersection).
-- Env var security: verify that `AGENTIC_OS_AUTH__PROFILES__0__APIKEY=evil` is blocked by the deny-list.
+- Env var security: verify that `CLOTHOS_AUTH__PROFILES__0__APIKEY=evil` is blocked by the deny-list.
 
 ---
 
@@ -1270,21 +1270,21 @@ End-to-end integration tests, a CLI for operators, and documentation that makes 
 
 ### What we build
 
-**CLI tool** (`agentic-os`) for system management:
+**CLI tool** (`clothos`) for system management:
 
 ```bash
-agentic-os init                    # Scaffold config + directories
-agentic-os start                   # Launch gateway + all agents
-agentic-os stop                    # Graceful shutdown
-agentic-os status                  # Show agent states, queue depths, health
-agentic-os agent list              # List registered agents
-agentic-os agent create <name>     # Scaffold a new agent
-agentic-os plugin install <path>   # Install a plugin
-agentic-os skill add <path>        # Add a skill
-agentic-os config validate         # Validate configuration (applies env overrides, shows effective config)
-agentic-os config show             # Show effective config after env overrides
-agentic-os logs <agentId>          # Tail agent logs
-agentic-os replay <sessionId>      # Replay a session from audit log
+clothos init                    # Scaffold config + directories
+clothos start                   # Launch gateway + all agents
+clothos stop                    # Graceful shutdown
+clothos status                  # Show agent states, queue depths, health
+clothos agent list              # List registered agents
+clothos agent create <name>     # Scaffold a new agent
+clothos plugin install <path>   # Install a plugin
+clothos skill add <path>        # Add a skill
+clothos config validate         # Validate configuration (applies env overrides, shows effective config)
+clothos config show             # Show effective config after env overrides
+clothos logs <agentId>          # Tail agent logs
+clothos replay <sessionId>      # Replay a session from audit log
 ```
 
 Note: `config validate` should apply `applyEnvOverrides()` after loading and show the effective config (with env overrides applied), so operators can verify what Docker/CI env vars produce.
@@ -1296,7 +1296,7 @@ Note: `config validate` should apply `applyEnvOverrides()` after loading and sho
 - The gateway process
 - OTel Collector → Jaeger + Prometheus + Grafana
 
-One `docker compose up` gets the entire system running. All config values can be overridden via `AGENTIC_OS_*` environment variables in the compose file (e.g., `AGENTIC_OS_GATEWAY__WEBSOCKET__PORT=9999`), following the 12-factor convention. No config file editing required for standard deployments.
+One `docker compose up` gets the entire system running. All config values can be overridden via `CLOTHOS_*` environment variables in the compose file (e.g., `CLOTHOS_GATEWAY__WEBSOCKET__PORT=9999`), following the 12-factor convention. No config file editing required for standard deployments.
 
 Embedding provider auto-detection (`provider: 'auto'`) means the compose stack works out of the box: set `OPENAI_API_KEY` to enable vector search, or leave it unset for BM25-only mode.
 
@@ -1308,14 +1308,14 @@ Embedding provider auto-detection (`provider: 'auto'`) means the compose stack w
 - **Scenario 5 — Plugin hot-reload**: start the system, add a plugin that registers a new tool, verify the tool is usable without restart.
 - **Scenario 6 — Security**: attempt a CRITICAL shell command; verify it's blocked, logged in audit, and an OTel span records the denial.
 - **Scenario 7 — Resilience**: kill the NATS server, verify the circuit breaker activates, restart NATS, verify messages drain and processing resumes.
-- **Scenario 8 — Env var overrides**: start with `AGENTIC_OS_GATEWAY__WEBSOCKET__PORT=9999`; verify the gateway binds to port 9999. Start with `AGENTIC_OS_SESSION__COMPACTION__RESERVETOKENS=5000`; verify compaction uses the overridden value.
+- **Scenario 8 — Env var overrides**: start with `CLOTHOS_GATEWAY__WEBSOCKET__PORT=9999`; verify the gateway binds to port 9999. Start with `CLOTHOS_SESSION__COMPACTION__RESERVETOKENS=5000`; verify compaction uses the overridden value.
 - **Scenario 9 — Binding overrides**: configure a binding with `overrides: { tools: { deny: ["bash"] } }`; send a message matching that binding; verify bash is denied. Send via a different binding; verify bash is allowed.
 
 **Documentation:**
 - `README.md` — quickstart (clone → configure → `docker compose up` → chat). Note env var overrides for zero-config deployment.
 - `docs/architecture.md` — this HLD distilled into a living doc.
 - `docs/configuration.md` — annotated config reference. Document:
-  - Env var override format (`AGENTIC_OS_` prefix, `__` nesting, type coercion)
+  - Env var override format (`CLOTHOS_` prefix, `__` nesting, type coercion)
   - Binding overrides (`overrides.model`, `overrides.sandbox`, `overrides.tools`, `overrides.workspace`)
   - Channel session policies (`allowlist`, `dm`, `group`)
   - Embedding auto-detection (`provider: 'auto'`)
@@ -1328,7 +1328,7 @@ Embedding provider auto-detection (`provider: 'auto'`) means the compose stack w
 - All 9 E2E scenarios pass in CI.
 - `docker compose up` from a clean checkout reaches healthy state in <60 seconds.
 - CLI commands complete without errors on a running system.
-- `agentic-os config validate` shows effective config with env overrides applied.
+- `clothos config validate` shows effective config with env overrides applied.
 
 ---
 

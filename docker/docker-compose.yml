@@ -30,7 +30,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.sandbox
-    image: agentic-os-sandbox:latest
+    image: clothos-sandbox:latest
     profiles:
       - sandbox
 

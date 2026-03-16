@@ -1,5 +1,5 @@
-import type { AgentMessage, InboundMessage, OutboundMessage } from '@agentic-os/core';
-import { generateId, now } from '@agentic-os/core';
+import type { AgentMessage, InboundMessage, OutboundMessage } from '@clothos/core';
+import { generateId, now } from '@clothos/core';
 
 /**
  * Build an AgentMessage from an inbound channel message.

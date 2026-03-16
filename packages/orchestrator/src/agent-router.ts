@@ -1,4 +1,4 @@
-import type { AgentHealthInfo, Binding, ResolvedBinding } from '@agentic-os/core';
+import type { AgentHealthInfo, Binding, ResolvedBinding } from '@clothos/core';
 import type { AgentRegistry } from './agent-registry.js';
 
 /** Options for the AgentRouter. */

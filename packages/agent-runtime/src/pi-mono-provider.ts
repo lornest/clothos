@@ -4,7 +4,7 @@ import type {
   Message as AosMessage,
   StreamChunk,
   ToolDefinition,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import { stream } from '@mariozechner/pi-ai';
 import type {
   Api,

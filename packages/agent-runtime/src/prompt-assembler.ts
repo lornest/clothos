@@ -1,4 +1,4 @@
-import type { Disposable, ToolDefinition, SkillEntry } from '@agentic-os/core';
+import type { Disposable, ToolDefinition, SkillEntry } from '@clothos/core';
 import type { HookRegistry } from './hook-registry.js';
 import type { FileSystem } from './types.js';
 import type { PromptAssemblerConfig } from './prompt-types.js';

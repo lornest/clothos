@@ -1,4 +1,4 @@
-import type { AgentMessage } from '@agentic-os/core';
+import type { AgentMessage } from '@clothos/core';
 import type { LaneKey, MessageHandler } from './types.js';
 
 interface QueueEntry {

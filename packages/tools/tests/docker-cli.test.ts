@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { DockerConfig } from '@agentic-os/core';
+import type { DockerConfig } from '@clothos/core';
 
 // Mock exec-util before importing docker-cli
 vi.mock('../src/sandbox/exec-util.js', () => ({
@@ -17,7 +17,7 @@ import { execFile } from '../src/sandbox/exec-util.js';
 const mockExecFile = vi.mocked(execFile);
 
 const testConfig: DockerConfig = {
-  image: 'agentic-os-sandbox:latest',
+  image: 'clothos-sandbox:latest',
   memoryLimit: '512m',
   cpuLimit: '1.0',
   pidsLimit: 100,
@@ -73,7 +73,7 @@ describe('docker-cli', () => {
       expect(args).toContain('--read-only');
       expect(args).toContain('-v');
       expect(args).toContain('/home/user/project:/workspace');
-      expect(args).toContain('agentic-os-sandbox:latest');
+      expect(args).toContain('clothos-sandbox:latest');
     });
 
     it('omits --read-only when readOnlyRoot is false', async () => {

@@ -4,7 +4,7 @@ import type {
   ChannelAdaptorConfig,
   OutboundMessage,
   Logger,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import { TelegramAdaptor } from '../src/telegram-adaptor.js';
 
 // ---- grammY mock ----

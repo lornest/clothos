@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-os/plugins",
+  "name": "@clothos/plugins",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -22,12 +22,12 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@agentic-os/core": "workspace:*",
+    "@clothos/core": "workspace:*",
     "semver": "^7.7.4",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@agentic-os/typescript-config": "workspace:*",
+    "@clothos/typescript-config": "workspace:*",
     "@types/node": "^22.19.11",
     "@types/semver": "^7.7.1",
     "tsup": "^8.5.1",

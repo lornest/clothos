@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ToolDefinition, SkillEntry } from '@agentic-os/core';
+import type { ToolDefinition, SkillEntry } from '@clothos/core';
 import type { BootstrapFile } from '../src/prompt-types.js';
 import {
   section,

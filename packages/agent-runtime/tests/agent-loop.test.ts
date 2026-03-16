@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { AgentEvent, LLMProvider, StreamChunk } from '@agentic-os/core';
+import type { AgentEvent, LLMProvider, StreamChunk } from '@clothos/core';
 import { agentLoop } from '../src/agent-loop.js';
 import { ConversationContext } from '../src/conversation-context.js';
 import { HookRegistry } from '../src/hook-registry.js';

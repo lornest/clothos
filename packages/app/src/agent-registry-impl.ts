@@ -1,4 +1,4 @@
-import type { AgentRegistry, AgentRegistryEntry } from '@agentic-os/orchestrator';
+import type { AgentRegistry, AgentRegistryEntry } from '@clothos/orchestrator';
 import type { WiredAgent } from './agent-wiring.js';
 
 /**

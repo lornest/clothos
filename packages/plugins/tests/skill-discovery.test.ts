@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { Logger } from '@agentic-os/core';
+import type { Logger } from '@clothos/core';
 import { discoverSkills, mergeSkillSources } from '../src/skill-discovery.js';
 
 function makeLogger(): Logger {

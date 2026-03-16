@@ -10,7 +10,7 @@ import type {
   ChannelsConfig,
   GatewayTransport,
   Logger,
-} from '@agentic-os/core';
+} from '@clothos/core';
 import { ChannelManager } from '../src/channel-manager.js';
 
 function makeLogger(): Logger {

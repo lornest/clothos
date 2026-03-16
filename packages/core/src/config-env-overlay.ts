@@ -1,4 +1,4 @@
-const PREFIX = 'AGENTIC_OS_';
+const PREFIX = 'CLOTHOS_';
 const SEPARATOR = '__';
 
 /**
@@ -21,11 +21,11 @@ function coerce(value: string): string | number | boolean {
 /**
  * Apply environment variable overrides to a config object.
  *
- * Variables must be prefixed with `AGENTIC_OS_`. Nesting is expressed
+ * Variables must be prefixed with `CLOTHOS_`. Nesting is expressed
  * with double-underscore (`__`). Values are coerced to numbers/booleans
  * where possible.
  *
- * Example: `AGENTIC_OS_GATEWAY__WEBSOCKET__PORT=9999`
+ * Example: `CLOTHOS_GATEWAY__WEBSOCKET__PORT=9999`
  *   → `config.gateway.websocket.port = 9999`
  *
  * @param config The config object to mutate in-place.

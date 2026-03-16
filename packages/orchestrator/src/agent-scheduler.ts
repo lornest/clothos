@@ -1,5 +1,5 @@
-import type { AgentEvent, ScheduledTask } from '@agentic-os/core';
-import { TaskPriority, generateId } from '@agentic-os/core';
+import type { AgentEvent, ScheduledTask } from '@clothos/core';
+import { TaskPriority, generateId } from '@clothos/core';
 
 /** Dispatch function signature: sends a message and yields agent events. */
 export type DispatchFn = (message: string, sessionId?: string) => AsyncGenerator<AgentEvent>;

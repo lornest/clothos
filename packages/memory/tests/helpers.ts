@@ -6,7 +6,7 @@ import type { MemoryChunk, MemoryConfig } from '../src/types.js';
 import { DEFAULT_MEMORY_CONFIG } from '../src/config.js';
 
 export function createTestDbPath(): string {
-  const dir = join(tmpdir(), 'agentic-os-test', randomUUID());
+  const dir = join(tmpdir(), 'clothos-test', randomUUID());
   mkdirSync(dir, { recursive: true });
   return join(dir, 'test.sqlite');
 }

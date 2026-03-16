@@ -1,0 +1,13 @@
+diff --git a/lib/Utils/validate-connection.js b/lib/Utils/validate-connection.js
+index 718bce756f98ec55bc629ee8df4a6f192acb2680..ab446825faf8dab23e356f0183c8e13314a29452 100644
+--- a/lib/Utils/validate-connection.js
++++ b/lib/Utils/validate-connection.js
+@@ -16,7 +16,7 @@ const getUserAgent = (config) => {
+             secondary: config.version[1],
+             tertiary: config.version[2],
+         },
+-        platform: WAProto_1.proto.ClientPayload.UserAgent.Platform.WEB,
++        platform: WAProto_1.proto.ClientPayload.UserAgent.Platform.MACOS,
+         releaseChannel: WAProto_1.proto.ClientPayload.UserAgent.ReleaseChannel.RELEASE,
+         osVersion: '0.1',
+         device: 'Desktop',

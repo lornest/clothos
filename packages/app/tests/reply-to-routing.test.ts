@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { AgentEvent, AgentMessage } from '@agentic-os/core';
-import { generateId, now } from '@agentic-os/core';
+import type { AgentEvent, AgentMessage } from '@clothos/core';
+import { generateId, now } from '@clothos/core';
 
 /**
  * Tests for the reply-to routing logic in agent-wiring.ts.

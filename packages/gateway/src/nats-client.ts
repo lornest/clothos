@@ -12,8 +12,8 @@ import {
   DeliverPolicy,
   createInbox as natsCreateInbox,
 } from 'nats';
-import { generateId } from '@agentic-os/core';
-import type { AgentMessage } from '@agentic-os/core';
+import { generateId } from '@clothos/core';
+import type { AgentMessage } from '@clothos/core';
 import type { StreamDefinition, MessageHandler, Subscription } from './types.js';
 
 const jc = JSONCodec<AgentMessage>();

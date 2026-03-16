@@ -1,4 +1,4 @@
-import type { ToolDefinition } from '@agentic-os/core';
+import type { ToolDefinition } from '@clothos/core';
 
 /** Build compact catalog for system prompt (excludes pinned tools). */
 export function buildMcpCatalog(

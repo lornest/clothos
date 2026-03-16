@@ -28,9 +28,9 @@ export class StaticServer {
     if (staticPath) {
       this.root = resolve(staticPath);
     } else {
-      // Resolve the @agentic-os/ui package dist directory
+      // Resolve the @clothos/ui package dist directory
       const require = createRequire(import.meta.url);
-      const uiPkgPath = require.resolve('@agentic-os/ui/dist/index.html');
+      const uiPkgPath = require.resolve('@clothos/ui/dist/index.html');
       this.root = join(uiPkgPath, '..');
     }
   }

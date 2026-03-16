@@ -11,7 +11,7 @@ import {
 let workspaceRoot: string;
 
 beforeAll(async () => {
-  workspaceRoot = await mkdtemp(join(tmpdir(), 'agentic-os-test-'));
+  workspaceRoot = await mkdtemp(join(tmpdir(), 'clothos-test-'));
 });
 
 afterAll(async () => {

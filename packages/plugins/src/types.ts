@@ -8,7 +8,7 @@ import type {
   PluginManifest,
   ToolDefinition,
   ToolHandler,
-} from '@agentic-os/core';
+} from '@clothos/core';
 
 /** Pre-load metadata for a discovered plugin. */
 export interface DiscoveredPlugin {

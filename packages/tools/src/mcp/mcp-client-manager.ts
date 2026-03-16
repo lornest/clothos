@@ -1,4 +1,4 @@
-import type { McpServerConfig, ToolDefinition, ToolHandler } from '@agentic-os/core';
+import type { McpServerConfig, ToolDefinition, ToolHandler } from '@clothos/core';
 import type { ToolRegistry } from '../registry.js';
 import { McpClientConnection, type McpToolInfo } from './mcp-client-connection.js';
 import { McpConnectionError } from '../errors.js';

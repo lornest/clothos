@@ -1,4 +1,4 @@
-export const PACKAGE_NAME = '@agentic-os/tools';
+export const PACKAGE_NAME = '@clothos/tools';
 
 export { ToolRegistry } from './registry.js';
 export {

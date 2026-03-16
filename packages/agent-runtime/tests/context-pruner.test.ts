@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Message } from '@agentic-os/core';
+import type { Message } from '@clothos/core';
 import type { AssembledContext } from '../src/types.js';
 import { createContextPrunerHandler, DEFAULT_MAX_HISTORY_SHARE } from '../src/context-pruner.js';
 

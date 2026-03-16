@@ -1,13 +1,17 @@
+import { randomBytes } from 'node:crypto';
+import * as path from 'node:path';
+import * as nodeFs from 'node:fs/promises';
 import type {
-  AgenticOsConfig,
+  ClothosConfig,
   LLMProvider,
   Logger,
-} from '@agentic-os/core';
-import { loadConfig, applyEnvOverrides } from '@agentic-os/core';
-import { GatewayServer, GatewayClient } from '@agentic-os/gateway';
-import { ChannelManager } from '@agentic-os/channels';
-import { TelegramAdaptor } from '@agentic-os/channels-telegram';
-import type { FileSystem, LLMServiceOptions } from '@agentic-os/agent-runtime';
+} from '@clothos/core';
+import { loadConfig, applyEnvOverrides } from '@clothos/core';
+import { GatewayServer, GatewayClient } from '@clothos/gateway';
+import { ChannelManager } from '@clothos/channels';
+import { TelegramAdaptor } from '@clothos/channels-telegram';
+import { WhatsAppAdaptor } from '@clothos/channels-whatsapp';
+import type { FileSystem, LLMServiceOptions } from '@clothos/agent-runtime';
 import {
   AgentRouter,
   AgentScheduler,
@@ -22,8 +26,8 @@ import {
   createPipelineHandler,
   broadcastToolDefinition,
   createBroadcastHandler,
-} from '@agentic-os/orchestrator';
-import type { AgentRegistry, RemoteDispatchTransport } from '@agentic-os/orchestrator';
+} from '@clothos/orchestrator';
+import type { AgentRegistry, RemoteDispatchTransport } from '@clothos/orchestrator';
 import { wireAgent } from './agent-wiring.js';
 import type { WiredAgent } from './agent-wiring.js';
 import { buildAgentRegistry } from './agent-registry-impl.js';
@@ -41,7 +45,7 @@ export interface AppServer {
   gateway: GatewayServer;
   channelManager: ChannelManager;
   agents: Map<string, WiredAgent>;
-  config: AgenticOsConfig;
+  config: ClothosConfig;
   scheduler: AgentScheduler;
   router: AgentRouter;
   agentRegistry: AgentRegistry;
@@ -209,9 +213,28 @@ export async function bootstrap(options: BootstrapOptions): Promise<AppServer> {
 
   // 5. Wire channel adaptors (connect as a regular WebSocket client)
   const channelsConfig = config.channels ?? { adaptors: {} };
+
+  // Auto-provision service key for channel adaptors
+  const keysDir = path.join(basePath, 'keys');
+  await nodeFs.mkdir(keysDir, { recursive: true });
+  const keyFile = path.join(keysDir, 'channels.key');
+
+  let channelKey: string;
+  try {
+    channelKey = (await nodeFs.readFile(keyFile, 'utf-8')).trim();
+  } catch {
+    // First run — generate and persist
+    channelKey = randomBytes(32).toString('hex');
+    await nodeFs.writeFile(keyFile, channelKey, { mode: 0o600 });
+    logger.info('Generated channel adaptor service key');
+  }
+
+  // Register with gateway so it accepts this key
+  gateway.registerServiceKey('channels', channelKey);
+
   const gatewayClient = new GatewayClient({
     url: `ws://localhost:${config.gateway.websocket.port}/ws`,
-    authToken: config.gateway.websocket.sharedSecret,
+    apiKey: channelKey,
     logger,
   });
   await gatewayClient.connect();
@@ -224,6 +247,7 @@ export async function bootstrap(options: BootstrapOptions): Promise<AppServer> {
   });
 
   channelManager.register(new TelegramAdaptor());
+  channelManager.register(new WhatsAppAdaptor());
 
   await channelManager.startAll();
   logger.info('Channel adaptors started');

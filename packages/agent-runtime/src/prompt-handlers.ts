@@ -1,4 +1,4 @@
-import type { HookHandler, ToolDefinition, SkillEntry } from '@agentic-os/core';
+import type { HookHandler, ToolDefinition, SkillEntry } from '@clothos/core';
 import type { AssembledContext } from './types.js';
 import type { PromptMode, RuntimeInfo } from './prompt-types.js';
 import type { BootstrapLoader } from './bootstrap-loader.js';

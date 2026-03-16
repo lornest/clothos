@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-os/channels-telegram",
+  "name": "@clothos/channels-telegram",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -25,8 +25,8 @@
     "grammy": "^1.35.0"
   },
   "devDependencies": {
-    "@agentic-os/core": "workspace:*",
-    "@agentic-os/typescript-config": "workspace:*",
+    "@clothos/core": "workspace:*",
+    "@clothos/typescript-config": "workspace:*",
     "@types/node": "^22.19.11",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

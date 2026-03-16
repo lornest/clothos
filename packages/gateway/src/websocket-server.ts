@@ -1,8 +1,8 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import type { IncomingMessage, Server as HttpServer } from 'node:http';
 import type { Duplex } from 'node:stream';
-import { generateId, now } from '@agentic-os/core';
-import type { AgentMessage } from '@agentic-os/core';
+import { generateId, now } from '@clothos/core';
+import type { AgentMessage } from '@clothos/core';
 import type { WsSession } from './types.js';
 
 /** Handler that receives a message along with its originating WS session ID. */

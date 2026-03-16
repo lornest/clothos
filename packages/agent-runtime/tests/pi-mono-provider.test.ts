@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Message, StreamChunk, ToolDefinition } from '@agentic-os/core';
+import type { Message, StreamChunk, ToolDefinition } from '@clothos/core';
 import { PiMonoProvider } from '../src/pi-mono-provider.js';
 import type { PiMonoProviderOptions } from '../src/pi-mono-provider.js';
 

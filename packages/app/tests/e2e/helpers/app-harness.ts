@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import type { AgentEntry, LLMProvider } from '@agentic-os/core';
+import type { AgentEntry, LLMProvider } from '@clothos/core';
 import { bootstrap } from '../../../src/bootstrap.js';
 import type { AppServer } from '../../../src/bootstrap.js';
 import {

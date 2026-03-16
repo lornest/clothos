@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { Logger, ToolDefinition, ToolHandler } from '@agentic-os/core';
+import type { Logger, ToolDefinition, ToolHandler } from '@clothos/core';
 import type { PluginLoaderCallbacks } from '../src/types.js';
 import { createPluginContext } from '../src/plugin-context-impl.js';
 

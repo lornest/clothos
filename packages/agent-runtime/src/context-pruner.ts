@@ -1,4 +1,4 @@
-import type { HookHandler, Message } from '@agentic-os/core';
+import type { HookHandler, Message } from '@clothos/core';
 import type { AssembledContext } from './types.js';
 
 export interface ContextPrunerOptions {

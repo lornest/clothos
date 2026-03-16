@@ -1,4 +1,4 @@
-import type { CompletionOptions, Message, ToolCall } from '@agentic-os/core';
+import type { CompletionOptions, Message, ToolCall } from '@clothos/core';
 
 export class ConversationContext {
   readonly agentId: string;

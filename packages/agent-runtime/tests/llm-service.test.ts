@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { LLMProvider, Message, StreamChunk, ToolDefinition } from '@agentic-os/core';
+import type { LLMProvider, Message, StreamChunk, ToolDefinition } from '@clothos/core';
 import { LLMService } from '../src/llm-service.js';
 import { LLMProviderUnavailableError } from '../src/errors.js';
 

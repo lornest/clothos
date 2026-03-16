@@ -1,0 +1,36 @@
+{
+  "name": "@clothos/channels-whatsapp",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "echo 'lint not yet configured'",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.16",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "@clothos/core": "workspace:*",
+    "@clothos/typescript-config": "workspace:*",
+    "@types/node": "^22.19.11",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

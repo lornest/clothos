@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { AgentEvent, AgentMessage } from '@agentic-os/core';
+import type { AgentEvent, AgentMessage } from '@clothos/core';
 import type { RemoteDispatchTransport } from '../src/remote-dispatch.js';
 import { RemoteAgentRegistryEntry } from '../src/remote-dispatch.js';
 

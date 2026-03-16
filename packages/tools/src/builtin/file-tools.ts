@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
-import type { ToolDefinition, ToolHandler } from '@agentic-os/core';
+import type { ToolDefinition, ToolHandler } from '@clothos/core';
 
 // ---------------------------------------------------------------------------
 // Tool Definitions

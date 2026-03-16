@@ -1,4 +1,4 @@
-import type { CommandHandler, Disposable } from '@agentic-os/core';
+import type { CommandHandler, Disposable } from '@clothos/core';
 
 /** Registry for slash commands provided by plugins. */
 export class CommandRegistry {

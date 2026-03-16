@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-os/app",
+  "name": "@clothos/app",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -24,18 +24,19 @@
     "start": "node dist/main.js"
   },
   "dependencies": {
-    "@agentic-os/core": "workspace:*",
-    "@agentic-os/gateway": "workspace:*",
-    "@agentic-os/channels": "workspace:*",
-    "@agentic-os/channels-telegram": "workspace:*",
-    "@agentic-os/agent-runtime": "workspace:*",
-    "@agentic-os/memory": "workspace:*",
-    "@agentic-os/tools": "workspace:*",
-    "@agentic-os/plugins": "workspace:*",
-    "@agentic-os/orchestrator": "workspace:*"
+    "@clothos/core": "workspace:*",
+    "@clothos/gateway": "workspace:*",
+    "@clothos/channels": "workspace:*",
+    "@clothos/channels-telegram": "workspace:*",
+    "@clothos/channels-whatsapp": "workspace:*",
+    "@clothos/agent-runtime": "workspace:*",
+    "@clothos/memory": "workspace:*",
+    "@clothos/tools": "workspace:*",
+    "@clothos/plugins": "workspace:*",
+    "@clothos/orchestrator": "workspace:*"
   },
   "devDependencies": {
-    "@agentic-os/typescript-config": "workspace:*",
+    "@clothos/typescript-config": "workspace:*",
     "@types/node": "^22.19.11",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

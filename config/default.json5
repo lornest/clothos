@@ -1,6 +1,6 @@
-// Agentic OS — Master Configuration
+// ClothOS — Master Configuration
 // JSON5 format: comments allowed, trailing commas OK, unquoted keys permitted.
-// Validated against the AgenticOsConfig schema in @agentic-os/core.
+// Validated against the ClothosConfig schema in @clothos/core.
 {
   gateway: {
     nats: {
@@ -11,8 +11,9 @@
     },
     websocket: {
       port: 18789,
-      allowAnonymous: false,
-      sharedSecret: "change-me",
+      allowAnonymous: true,
+      // jwtSecret: optional — auto-generated if omitted
+      // tokenExpiryMs: 3600000, // 1 hour default
     },
     maxConcurrentAgents: 5,
     ui: { enabled: true, title: "Agent OS" },
@@ -94,7 +95,7 @@
     mode: "off",
     scope: "session",
     docker: {
-      image: "agentic-os-sandbox:latest",
+      image: "clothos-sandbox:latest",
       memoryLimit: "512m",
       cpuLimit: "1.0",
       pidsLimit: 256,
@@ -125,6 +126,13 @@
           botToken: "",            // set via env overlay or direct value
         },
         // allowlist: [],          // uncomment to restrict by Telegram user ID
+      },
+      whatsapp: {
+        enabled: false,            // opt-in — requires QR scan on first run
+        settings: {
+          authDir: "whatsapp-auth", // relative to basePath
+        },
+        // allowlist: [],          // uncomment to restrict by WhatsApp JID
       },
     },
   },

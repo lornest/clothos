@@ -1,11 +1,11 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import type { FileSystem } from '@agentic-os/agent-runtime';
-import type { AgentEntry, Logger } from '@agentic-os/core';
+import type { FileSystem } from '@clothos/agent-runtime';
+import type { AgentEntry, Logger } from '@clothos/core';
 
 /** Create a temp directory for test data. */
-export async function createTempDir(prefix = 'agentic-os-test-'): Promise<string> {
+export async function createTempDir(prefix = 'clothos-test-'): Promise<string> {
   return fs.mkdtemp(path.join(os.tmpdir(), prefix));
 }
 
@@ -119,7 +119,7 @@ export async function writeTestConfig(
     mode: "off",
     scope: "session",
     docker: {
-      image: "agentic-os-sandbox:latest",
+      image: "clothos-sandbox:latest",
       memoryLimit: "512m",
       cpuLimit: "1.0",
       pidsLimit: 256,

@@ -1,4 +1,4 @@
-import type { ToolCall, ToolDefinition, ToolResult, ToolHandler, ToolHandlerMap } from '@agentic-os/core';
+import type { ToolCall, ToolDefinition, ToolResult, ToolHandler, ToolHandlerMap } from '@clothos/core';
 
 export type { ToolHandler, ToolHandlerMap };
 

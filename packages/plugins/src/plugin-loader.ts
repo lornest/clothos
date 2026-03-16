@@ -1,4 +1,4 @@
-import type { Logger, Plugin } from '@agentic-os/core';
+import type { Logger, Plugin } from '@clothos/core';
 import { PluginLoadError } from './errors.js';
 import type { LoadedPlugin, PluginLoaderCallbacks, PluginLoaderOptions } from './types.js';
 import { discoverPlugins } from './plugin-discovery.js';

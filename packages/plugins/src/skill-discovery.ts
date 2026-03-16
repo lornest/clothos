@@ -1,6 +1,6 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { SkillEntry } from '@agentic-os/core';
+import type { SkillEntry } from '@clothos/core';
 import type { SkillDiscoveryOptions } from './types.js';
 import { parseSkillFile } from './skill-parser.js';
 import { filterAvailableSkills } from './skill-gating.js';

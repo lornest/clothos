@@ -79,4 +79,37 @@ describe('config validator', () => {
     }`);
     expect(result.valid).toBe(true);
   });
+
+  it('accepts config without sharedSecret when allowAnonymous is false', () => {
+    const result = validateConfig(`{
+      gateway: { nats: { url: "nats://localhost:4222" }, redis: { url: "redis://localhost:6379" }, websocket: { port: 18789, allowAnonymous: false }, maxConcurrentAgents: 5 },
+      agents: { defaults: { model: "pi-mono", contextWindow: 128000, maxTurns: 100 }, list: [] },
+      bindings: [],
+      models: { providers: [], fallbacks: [] },
+      auth: { profiles: [] },
+      session: { idleTimeoutMs: 1800000, maxHistoryEntries: 1000, compaction: { enabled: true, reserveTokens: 20000 } },
+      tools: {},
+      sandbox: { mode: "off", scope: "session", docker: { image: "sandbox:latest" } },
+      plugins: { directories: [], enabled: [], disabled: [] },
+    }`);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('validates jwtSecret and tokenExpiryMs types', () => {
+    const result = validateConfig(`{
+      gateway: { nats: { url: "nats://localhost:4222" }, redis: { url: "redis://localhost:6379" }, websocket: { port: 18789, allowAnonymous: true, jwtSecret: 123, tokenExpiryMs: "bad" }, maxConcurrentAgents: 5 },
+      agents: { defaults: { model: "pi-mono", contextWindow: 128000, maxTurns: 100 }, list: [] },
+      bindings: [],
+      models: { providers: [], fallbacks: [] },
+      auth: { profiles: [] },
+      session: { idleTimeoutMs: 1800000, maxHistoryEntries: 1000, compaction: { enabled: true, reserveTokens: 20000 } },
+      tools: {},
+      sandbox: { mode: "off", scope: "session", docker: { image: "sandbox:latest" } },
+      plugins: { directories: [], enabled: [], disabled: [] },
+    }`);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path === 'gateway.websocket.jwtSecret')).toBe(true);
+    expect(result.errors.some((e) => e.path === 'gateway.websocket.tokenExpiryMs')).toBe(true);
+  });
 });

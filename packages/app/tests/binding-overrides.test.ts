@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { AgentMessage, BindingOverrides } from '@agentic-os/core';
+import type { AgentMessage, BindingOverrides } from '@clothos/core';
 
 // Test the override serialization/deserialization pattern
 describe('binding overrides', () => {

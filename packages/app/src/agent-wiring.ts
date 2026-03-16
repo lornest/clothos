@@ -10,16 +10,16 @@ import type {
   MemoryConfig,
   SkillsConfig,
   Logger,
-} from '@agentic-os/core';
-import { generateId, now } from '@agentic-os/core';
-import { AgentManager, LLMService } from '@agentic-os/agent-runtime';
-import type { FileSystem, LLMServiceOptions } from '@agentic-os/agent-runtime';
+} from '@clothos/core';
+import { generateId, now } from '@clothos/core';
+import { AgentManager, LLMService } from '@clothos/agent-runtime';
+import type { FileSystem, LLMServiceOptions } from '@clothos/agent-runtime';
 
 import {
   ToolRegistry,
   registerBuiltinTools,
   PolicyEngine,
-} from '@agentic-os/tools';
+} from '@clothos/tools';
 import {
   EpisodicMemoryStore,
   HeuristicImportanceScorer,
@@ -31,10 +31,10 @@ import {
   DEFAULT_MEMORY_CONFIG,
   mergeMemoryConfig,
   resolveEmbeddingProvider,
-} from '@agentic-os/memory';
-import { PluginLoader, discoverSkills } from '@agentic-os/plugins';
-import type { PluginLoaderCallbacks } from '@agentic-os/plugins';
-import type { GatewayServer } from '@agentic-os/gateway';
+} from '@clothos/memory';
+import { PluginLoader, discoverSkills } from '@clothos/plugins';
+import type { PluginLoaderCallbacks } from '@clothos/plugins';
+import type { GatewayServer } from '@clothos/gateway';
 import { ResponseRouter } from './response-router.js';
 
 export interface AgentWiringOptions {

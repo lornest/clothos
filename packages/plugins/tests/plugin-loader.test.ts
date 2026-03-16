@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { Logger, Plugin, PluginManifest } from '@agentic-os/core';
+import type { Logger, Plugin, PluginManifest } from '@clothos/core';
 import type { PluginLoaderCallbacks } from '../src/types.js';
 import { PluginLoader } from '../src/plugin-loader.js';
 import { PluginLoadError } from '../src/errors.js';
@@ -62,13 +62,13 @@ export default {
 `,
     );
 
-    // Create package.json with agenticOs field
+    // Create package.json with clothos field
     await writeFile(
       join(pluginDir, 'package.json'),
       JSON.stringify({
         name: `@test/${name}`,
         version: manifest.version,
-        agenticOs: {
+        clothos: {
           entry: 'dist/index.js',
           manifest,
         },
@@ -188,7 +188,7 @@ export default {
       JSON.stringify({
         name: '@test/bad-plugin',
         version: '1.0.0',
-        agenticOs: {
+        clothos: {
           entry: 'dist/index.js',
           manifest: { name: 'bad-plugin', version: '1.0.0', description: 'Bad' },
         },
