@@ -9,6 +9,24 @@ import {
   createWriteFileHandler,
   createEditFileHandler,
 } from './file-tools.js';
+import {
+  grepSearchToolDefinition,
+  globFindToolDefinition,
+  listDirectoryToolDefinition,
+  createGrepSearchHandler,
+  createGlobFindHandler,
+  createListDirectoryHandler,
+} from './search-tools.js';
+import {
+  gitStatusToolDefinition,
+  gitDiffToolDefinition,
+  gitCommitToolDefinition,
+  createPrToolDefinition,
+  createGitStatusHandler,
+  createGitDiffHandler,
+  createGitCommitHandler,
+  createCreatePrHandler,
+} from './git-tools.js';
 
 export interface RegisterBuiltinOptions {
   workspaceRoot: string;
@@ -21,8 +39,7 @@ export interface RegisterBuiltinOptions {
 }
 
 /**
- * Register all built-in tools (bash, read_file, write_file, edit_file) into the
- * given registry.
+ * Register all built-in tools into the given registry.
  */
 export function registerBuiltinTools(
   registry: ToolRegistry,
@@ -43,4 +60,17 @@ export function registerBuiltinTools(
   registry.register(readFileToolDefinition, createReadFileHandler(fileOpts), 'builtin');
   registry.register(writeFileToolDefinition, createWriteFileHandler(fileOpts), 'builtin');
   registry.register(editFileToolDefinition, createEditFileHandler(fileOpts), 'builtin');
+
+  // Search tools
+  registry.register(grepSearchToolDefinition, createGrepSearchHandler(fileOpts), 'builtin');
+  registry.register(globFindToolDefinition, createGlobFindHandler(fileOpts), 'builtin');
+  registry.register(listDirectoryToolDefinition, createListDirectoryHandler(fileOpts), 'builtin');
+
+  // Git tools
+  const gitOpts = { workspaceRoot, timeout: defaultTimeout };
+
+  registry.register(gitStatusToolDefinition, createGitStatusHandler(gitOpts), 'builtin');
+  registry.register(gitDiffToolDefinition, createGitDiffHandler(gitOpts), 'builtin');
+  registry.register(gitCommitToolDefinition, createGitCommitHandler(gitOpts), 'builtin');
+  registry.register(createPrToolDefinition, createCreatePrHandler(gitOpts), 'builtin');
 }

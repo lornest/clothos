@@ -155,4 +155,38 @@ describe('createEditFileHandler', () => {
 
     expect(result.error).toContain('Path traversal detected');
   });
+
+  it('replaces all occurrences when replace_all is true', async () => {
+    const writeHandler = createWriteFileHandler({ workspaceRoot });
+    await writeHandler({ path: 'edit-replace-all.txt', content: 'aaa bbb aaa ccc aaa' });
+
+    const editHandler = createEditFileHandler({ workspaceRoot });
+    const result = (await editHandler({
+      path: 'edit-replace-all.txt',
+      old_string: 'aaa',
+      new_string: 'zzz',
+      replace_all: true,
+    })) as { edited: boolean; replacements: number; path: string };
+
+    expect(result.edited).toBe(true);
+    expect(result.replacements).toBe(3);
+
+    // Verify file contents
+    const content = await readFile(join(workspaceRoot, 'edit-replace-all.txt'), 'utf-8');
+    expect(content).toBe('zzz bbb zzz ccc zzz');
+  });
+
+  it('returns case-insensitive hint when no exact match found', async () => {
+    const writeHandler = createWriteFileHandler({ workspaceRoot });
+    await writeHandler({ path: 'edit-case-hint.txt', content: 'Hello World' });
+
+    const editHandler = createEditFileHandler({ workspaceRoot });
+    const result = (await editHandler({
+      path: 'edit-case-hint.txt',
+      old_string: 'hello world',
+      new_string: 'goodbye',
+    })) as { error: string };
+
+    expect(result.error).toContain('case-insensitive match exists');
+  });
 });

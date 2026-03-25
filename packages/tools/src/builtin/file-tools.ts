@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { resolve, dirname } from 'node:path';
+import { dirname } from 'node:path';
 import type { ToolDefinition, ToolHandler } from '@clothos/core';
+import { safePath } from './safe-path.js';
 
 // ---------------------------------------------------------------------------
 // Tool Definitions
@@ -60,7 +61,7 @@ export const writeFileToolDefinition: ToolDefinition = {
 export const editFileToolDefinition: ToolDefinition = {
   name: 'edit_file',
   description:
-    'Edit a file by replacing a unique occurrence of old_string with new_string.',
+    'Edit a file by replacing a unique occurrence of old_string with new_string. Set replace_all to replace every occurrence.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -70,11 +71,15 @@ export const editFileToolDefinition: ToolDefinition = {
       },
       old_string: {
         type: 'string',
-        description: 'The exact string to find and replace. Must be unique in the file.',
+        description: 'The exact string to find and replace. Must be unique in the file unless replace_all is true.',
       },
       new_string: {
         type: 'string',
         description: 'The replacement string.',
+      },
+      replace_all: {
+        type: 'boolean',
+        description: 'When true, replace all occurrences instead of requiring a unique match.',
       },
     },
     required: ['path', 'old_string', 'new_string'],
@@ -91,22 +96,6 @@ export const editFileToolDefinition: ToolDefinition = {
 
 export interface FileToolOptions {
   workspaceRoot: string;
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Resolve a user-supplied path against the workspace root and guard against
- * path-traversal attacks.  Returns the resolved absolute path or throws.
- */
-function safePath(workspaceRoot: string, userPath: string): string {
-  const resolved = resolve(workspaceRoot, userPath);
-  if (!resolved.startsWith(workspaceRoot)) {
-    throw new Error(`Path traversal detected: ${userPath}`);
-  }
-  return resolved;
 }
 
 // ---------------------------------------------------------------------------
@@ -219,6 +208,8 @@ export function createEditFileHandler(opts: FileToolOptions): ToolHandler {
       return { error: `Failed to read file: ${(err as Error).message}` };
     }
 
+    const replaceAll = args.replace_all === true;
+
     // Count occurrences
     let count = 0;
     let searchFrom = 0;
@@ -230,15 +221,24 @@ export function createEditFileHandler(opts: FileToolOptions): ToolHandler {
     }
 
     if (count === 0) {
+      // Provide a hint if a case-insensitive match exists
+      if (content.toLowerCase().includes(oldString.toLowerCase())) {
+        return { error: 'No exact match found. A case-insensitive match exists — check your casing.' };
+      }
       return { error: 'No match found' };
     }
-    if (count > 1) {
-      return {
-        error: `Multiple matches found (${count} occurrences). Provide more context to make the match unique.`,
-      };
-    }
 
-    const updated = content.replace(oldString, newString);
+    let updated: string;
+    if (replaceAll) {
+      updated = content.split(oldString).join(newString);
+    } else {
+      if (count > 1) {
+        return {
+          error: `Multiple matches found (${count} occurrences). Provide more context to make the match unique.`,
+        };
+      }
+      updated = content.replace(oldString, newString);
+    }
 
     try {
       await writeFile(resolved, updated, 'utf-8');
@@ -246,6 +246,8 @@ export function createEditFileHandler(opts: FileToolOptions): ToolHandler {
       return { error: `Failed to write file: ${(err as Error).message}` };
     }
 
-    return { edited: true, path: resolved };
+    return replaceAll
+      ? { edited: true, replacements: count, path: resolved }
+      : { edited: true, path: resolved };
   };
 }
