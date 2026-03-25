@@ -101,6 +101,20 @@ export function GatewayRuntimeProvider({
     const correlationId = generateId();
     pendingRef.current.add(correlationId);
 
+    // Parse /plan command and send structured metadata
+    const planMatch = text.match(/^\/plan\s+(\S+)(?:\s+(.+))?$/s);
+    let messageText = text;
+    let extraMetadata: Record<string, string> = {};
+
+    if (planMatch) {
+      const slug = planMatch[1]!;
+      const goal = planMatch[2]?.trim();
+      extraMetadata = { 'x-plan-mode': 'true', 'x-plan-slug': slug };
+      messageText = goal
+        ? `Plan the following task: ${goal}`
+        : `Explore the codebase and create an implementation plan for: ${slug}`;
+    }
+
     const agentMsg: AgentMessage = {
       id: generateId(),
       specversion: '1.0',
@@ -109,11 +123,12 @@ export function GatewayRuntimeProvider({
       target: 'agent://assistant',
       time: now(),
       datacontenttype: 'application/json',
-      data: { text, sessionId: sessionIdRef.current ?? undefined },
+      data: { text: messageText, sessionId: sessionIdRef.current ?? undefined },
       correlationId,
       metadata: {
         channelType: 'webchat',
         senderId,
+        ...extraMetadata,
       },
     };
 
