@@ -7,6 +7,9 @@ export const TOOL_GROUPS: Record<string, string[]> = {
   'group:memory': ['memory_search', 'memory_get'],
   'group:mcp': ['use_mcp_tool'],
   'group:orchestration': ['agent_spawn', 'agent_send'],
+  'group:search': ['grep_search', 'glob_find', 'list_directory'],
+  'group:git': ['git_status', 'git_diff', 'git_commit', 'create_pr'],
+  'group:plan': ['read_file', 'grep_search', 'glob_find', 'list_directory', 'git_status', 'git_diff', 'exit_plan_mode', 'write_plan', 'edit_plan'],
 };
 
 /**

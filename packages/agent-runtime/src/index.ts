@@ -101,3 +101,26 @@ export {
 // Prompt enrichment — assembler
 export { registerPromptHandlers } from './prompt-assembler.js';
 export type { RegisterPromptHandlersParams } from './prompt-assembler.js';
+
+// Plan mode
+export {
+  PlanModeController,
+  createPlanModeToolCallHook,
+  createPlanModePromptHandler,
+  createPlanContextHandler,
+  enterPlanModeToolDefinition,
+  createEnterPlanModeHandler,
+  exitPlanModeToolDefinition,
+  createExitPlanModeHandler,
+  writePlanToolDefinition,
+  createWritePlanHandler,
+  editPlanToolDefinition,
+  createEditPlanHandler,
+} from './plan-mode/index.js';
+export type {
+  PlanModeConfig,
+  PlanModeState,
+  PlanModeControllerOptions,
+  PlanModeTools,
+  ExitPlanModeResult,
+} from './plan-mode/index.js';
