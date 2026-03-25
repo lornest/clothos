@@ -8,11 +8,6 @@ services:
       - ./nats-server.conf:/etc/nats/nats-server.conf
       - nats-data:/data
     command: ["-c", "/etc/nats/nats-server.conf"]
-    healthcheck:
-      test: ["CMD", "nats-server", "--signal", "ldm"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   redis:
     image: redis:7
@@ -26,6 +21,58 @@ services:
       timeout: 5s
       retries: 3
 
+  # ── ClothOS nodes ────────────────────────────────────────
+  # Mount your node config (with secrets) at /app/config/node.json5
+  # Pass API keys via environment variables.
+  #
+  # Usage:
+  #   docker-compose up nats redis node-a
+  #   docker-compose --profile sandbox up    # include sandbox service
+
+  node-a:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.node
+    volumes:
+      - ../config/node-a.json5:/app/config/node.json5:ro
+      - node-a-data:/data
+      - node-a-workspace:/workspace
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../config/.env.node-a
+    environment:
+      - CLOTHOS_PROVIDER=${CLOTHOS_PROVIDER:-anthropic}
+      - CLOTHOS_MODEL=${CLOTHOS_MODEL:-claude-sonnet-4-20250514}
+    depends_on:
+      nats:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  node-b:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.node
+    volumes:
+      - ../config/node-b.json5:/app/config/node.json5:ro
+      - node-b-data:/data
+      - node-b-workspace:/workspace
+    ports:
+      - "3001:3000"
+    env_file:
+      - ../config/.env.node-b
+    environment:
+      - CLOTHOS_PROVIDER=${CLOTHOS_PROVIDER:-anthropic}
+      - CLOTHOS_MODEL=${CLOTHOS_MODEL:-claude-sonnet-4-20250514}
+    depends_on:
+      nats:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
   sandbox:
     build:
       context: ..
@@ -37,3 +84,7 @@ services:
 volumes:
   nats-data:
   redis-data:
+  node-a-data:
+  node-a-workspace:
+  node-b-data:
+  node-b-workspace:

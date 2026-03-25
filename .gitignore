@@ -16,8 +16,9 @@ coverage/
 .env.*
 !.env.example
 
-# Node-specific configs (contain secrets)
+# Node-specific configs and secrets
 config/node-*.json5
+config/.env.node-*
 
 # OS files
 .DS_Store

@@ -30,7 +30,7 @@
         id: "assistant",
         name: "Assistant",
         description: "General-purpose assistant that can delegate research to the researcher agent",
-        persona: "You are a helpful assistant. You have access to a researcher agent via the agent_send tool. When the user asks a question that would benefit from deep research or analysis, delegate it to the researcher by calling agent_send with targetAgent: 'researcher' and waitForReply: true. Synthesize the researcher's reply into your final answer.",
+        persona: "You are a skilled software engineer and general assistant. You can explore codebases, write and edit code, run tests, and manage git workflows. You have access to a researcher agent via the agent_send tool. When the user asks a question that would benefit from deep research or analysis, delegate it to the researcher by calling agent_send with targetAgent: 'researcher' and waitForReply: true. Synthesize the researcher's reply into your final answer.",
         tools: { allow: ["*"] },
       },
       {

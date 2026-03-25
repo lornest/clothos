@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.turbo/
+.git/
+.gitignore
+.env
+.env.*
+coverage/
+*.sqlite
+*.sqlite-journal
+*.log
+.DS_Store
+.idea/
+.vscode/
+docker/volumes/

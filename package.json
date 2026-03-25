@@ -14,7 +14,10 @@
     "clean": "turbo run clean",
     "repl": "tsx scripts/repl.mts",
     "start": "node packages/app/dist/main.js",
-    "build:sandbox": "docker compose -f docker/docker-compose.yml build sandbox"
+    "build:sandbox": "docker-compose -f docker/docker-compose.yml build sandbox",
+    "docker:build": "docker-compose -f docker/docker-compose.yml build node-a node-b",
+    "docker:up": "docker-compose -f docker/docker-compose.yml up -d nats redis node-a",
+    "docker:down": "docker-compose -f docker/docker-compose.yml down"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
