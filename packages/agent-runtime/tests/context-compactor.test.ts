@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { LLMProvider, StreamChunk } from '@clothos/core';
+import type { LLMProvider, StreamChunk, Message } from '@clothos/core';
 import { ContextCompactor } from '../src/context-compactor.js';
 import { ConversationContext } from '../src/conversation-context.js';
 import { HookRegistry } from '../src/hook-registry.js';
@@ -27,6 +27,36 @@ function createMockLLMService(tokenCount: number, summaryText = 'Summary of conv
   });
   service.bindSession('test');
   return service;
+}
+
+/**
+ * Creates a mock LLM service that captures the messages sent to streamCompletion,
+ * so we can verify that history was truncated before being sent.
+ */
+function createCapturingLLMService(tokenCount: number, summaryText = 'Summary') {
+  const capturedMessages: Message[][] = [];
+  const chunks: StreamChunk[] = [
+    { type: 'text_delta', text: summaryText },
+    { type: 'done', finishReason: 'stop' },
+  ];
+  const provider: LLMProvider = {
+    id: 'mock',
+    supportsPromptCaching: false,
+    async *streamCompletion(messages: Message[]): AsyncIterable<StreamChunk> {
+      capturedMessages.push([...messages]);
+      for (const c of chunks) yield c;
+    },
+    async countTokens(): Promise<number> {
+      return tokenCount;
+    },
+  };
+  const service = new LLMService({
+    providers: [provider],
+    models: { providers: [], fallbacks: [] },
+    auth: { profiles: [] },
+  });
+  service.bindSession('test');
+  return { service, capturedMessages };
 }
 
 describe('ContextCompactor', () => {
@@ -121,5 +151,101 @@ describe('ContextCompactor', () => {
     await compactor.compact(ctx, llm, hooks);
 
     expect(fired).toEqual(['memory_flush', 'session_compact']);
+  });
+
+  it('truncates verbose tool results before summarizing', async () => {
+    const { service, capturedMessages } = createCapturingLLMService(1000);
+    const hooks = new HookRegistry();
+    // Large enough window that tool truncation alone brings it under budget
+    const compactor = new ContextCompactor({
+      contextWindow: 10000,
+      reserveTokens: 200,
+    });
+
+    const ctx = new ConversationContext({
+      agentId: 'a1',
+      sessionId: 's1',
+      systemPrompt: 'sys',
+    });
+
+    ctx.addUserMessage('Read the file');
+    ctx.addAssistantMessage('Reading...', [{ id: 'tc1', name: 'read_file', arguments: '{}' }]);
+    // Add a very long tool result (2000 chars)
+    ctx.addToolResult('tc1', 'x'.repeat(2000));
+    ctx.addAssistantMessage('Done');
+
+    await compactor.compact(ctx, service, hooks);
+
+    // The summary prompt should have the tool result truncated
+    const summaryUserMsg = capturedMessages[0]![1]!;
+    expect(summaryUserMsg.content).toContain('... [truncated]');
+    expect(summaryUserMsg.content.length).toBeLessThan(2000);
+  });
+
+  it('truncates history when it exceeds context window budget', async () => {
+    const { service, capturedMessages } = createCapturingLLMService(1000);
+    const hooks = new HookRegistry();
+    // Tiny context window — forces truncation
+    const compactor = new ContextCompactor({
+      contextWindow: 200,
+      reserveTokens: 50,
+    });
+
+    const ctx = new ConversationContext({
+      agentId: 'a1',
+      sessionId: 's1',
+      systemPrompt: 'sys',
+    });
+
+    // Add many exchanges that exceed the budget
+    for (let i = 1; i <= 50; i++) {
+      ctx.addUserMessage(`Question ${i}: ${'a'.repeat(100)}`);
+      ctx.addAssistantMessage(`Answer ${i}: ${'b'.repeat(100)}`);
+    }
+
+    await compactor.compact(ctx, service, hooks);
+
+    // The summary prompt should be significantly smaller than the full history
+    const summaryUserMsg = capturedMessages[0]![1]!;
+    const fullHistoryLength = ctx.getHistory()
+      .map((m) => `${m.role}: ${m.content}`)
+      .join('\n').length;
+
+    expect(summaryUserMsg.content.length).toBeLessThan(fullHistoryLength);
+    // Should contain the truncation marker
+    expect(summaryUserMsg.content).toContain('truncated');
+  });
+
+  it('handles compaction without crashing when history is enormous', async () => {
+    const { service } = createCapturingLLMService(1000);
+    const hooks = new HookRegistry();
+    const compactor = new ContextCompactor({
+      contextWindow: 500,
+      reserveTokens: 100,
+    });
+
+    const ctx = new ConversationContext({
+      agentId: 'a1',
+      sessionId: 's1',
+      systemPrompt: 'sys',
+    });
+
+    // Simulate a huge conversation (like 1.3MB)
+    for (let i = 1; i <= 100; i++) {
+      ctx.addUserMessage(`Q${i}`);
+      ctx.addAssistantMessage(`A${i}`, [{ id: `tc${i}`, name: 'read_file', arguments: '{}' }]);
+      ctx.addToolResult(`tc${i}`, 'x'.repeat(5000));
+      ctx.addAssistantMessage(`Done ${i}`);
+    }
+
+    // Should not hang or throw
+    await compactor.compact(ctx, service, hooks);
+
+    // Context should be compacted
+    const msgs = ctx.getMessages();
+    expect(msgs[0]!.role).toBe('system');
+    expect(msgs[1]!.content).toContain('Summary');
+    // Should be much smaller than original
+    expect(msgs.length).toBeLessThan(50);
   });
 });
