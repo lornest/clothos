@@ -299,8 +299,8 @@ export class AgentManager {
     nats: NatsClient,
     onResponse?: (event: AgentEvent, originalMsg: AgentMessage) => void,
     onDone?: (originalMsg: AgentMessage) => void,
-    onBeforeDispatch?: (originalMsg: AgentMessage) => void,
-    onAfterDispatch?: (originalMsg: AgentMessage) => void,
+    onBeforeDispatch?: (originalMsg: AgentMessage) => void | Promise<void>,
+    onAfterDispatch?: (originalMsg: AgentMessage) => void | Promise<void>,
   ): Promise<Subscription> {
     const subject = `agent.${this.agentId}.inbox`;
     const sub = await nats.subscribe(subject, async (msg) => {
@@ -325,7 +325,12 @@ export class AgentManager {
 
       console.log(`[INBOX] ${this.agentId} dispatching: "${userMessage.slice(0, 80)}..." (status: ${this.status})`);
       try {
-        onBeforeDispatch?.(msg);
+        await onBeforeDispatch?.(msg);
+        // Re-read in case onBeforeDispatch mutated data.text
+        const postData = msg.data as Record<string, unknown> | string | undefined;
+        if (typeof postData === 'object' && postData && typeof postData['text'] === 'string') {
+          userMessage = postData['text'];
+        }
         for await (const event of this.dispatch(userMessage, sessionId)) {
           console.log(`[INBOX] ${this.agentId} event: type=${event.type}`);
           onResponse?.(event, msg);
@@ -339,7 +344,7 @@ export class AgentManager {
           msg,
         );
       } finally {
-        onAfterDispatch?.(msg);
+        await onAfterDispatch?.(msg);
       }
     });
     this.inboxSubscription = sub;
