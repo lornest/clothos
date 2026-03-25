@@ -25,6 +25,14 @@ export const agentSendToolDefinition: ToolDefinition = {
         type: 'number',
         description: 'Maximum number of back-and-forth exchanges when waiting for reply.',
       },
+      planMode: {
+        type: 'boolean',
+        description: 'If true, target agent enters plan mode and creates an implementation plan before processing the message.',
+      },
+      planSlug: {
+        type: 'string',
+        description: 'Slug for the plan file when planMode is true. Defaults to a generated name.',
+      },
     },
     required: ['targetAgent', 'message'],
   },
@@ -59,6 +67,8 @@ export function createAgentSendHandler(
     const message = args['message'] as string;
     const waitForReply = (args['waitForReply'] as boolean | undefined) ?? false;
     const maxExchanges = (args['maxExchanges'] as number | undefined) ?? defaultMaxExchanges;
+    const planMode = args['planMode'] as boolean | undefined;
+    const planSlug = args['planSlug'] as string | undefined;
 
     // Look up target
     const entry = registry.get(targetAgent);
@@ -70,6 +80,16 @@ export function createAgentSendHandler(
     const status = entry.getStatus();
     if (status !== 'READY' && status !== 'RUNNING') {
       return { error: `Agent "${targetAgent}" is not available (status: ${status})` };
+    }
+
+    // Enter plan mode on target if requested
+    if (planMode && entry.enterPlanMode) {
+      const slug = planSlug ?? `delegated-${Date.now()}`;
+      try {
+        await entry.enterPlanMode({ slug, goal: message });
+      } catch (err) {
+        return { error: `Failed to enter plan mode on "${targetAgent}": ${err instanceof Error ? err.message : String(err)}` };
+      }
     }
 
     const formattedMessage = `[Message from ${callerAgentId}]\n\n${message}`;

@@ -12,8 +12,14 @@ import type {
   Logger,
 } from '@clothos/core';
 import { generateId, now } from '@clothos/core';
-import { AgentManager, LLMService } from '@clothos/agent-runtime';
-import type { FileSystem, LLMServiceOptions } from '@clothos/agent-runtime';
+import {
+  AgentManager,
+  LLMService,
+  PlanModeController,
+  enterPlanModeToolDefinition,
+  createEnterPlanModeHandler,
+} from '@clothos/agent-runtime';
+import type { FileSystem, LLMServiceOptions, PlanModeConfig, ExitPlanModeResult } from '@clothos/agent-runtime';
 
 import {
   ToolRegistry,
@@ -32,7 +38,7 @@ import {
   mergeMemoryConfig,
   resolveEmbeddingProvider,
 } from '@clothos/memory';
-import { PluginLoader, discoverSkills } from '@clothos/plugins';
+import { PluginLoader, discoverSkills, CommandRegistry, ServiceRegistry } from '@clothos/plugins';
 import type { PluginLoaderCallbacks } from '@clothos/plugins';
 import type { GatewayServer } from '@clothos/gateway';
 import { ResponseRouter } from './response-router.js';
@@ -58,6 +64,10 @@ export interface WiredAgent {
   registry: ToolRegistry;
   policyEngine: PolicyEngine;
   memoryStore?: EpisodicMemoryStore;
+  planMode: PlanModeController;
+  enterPlanMode: (config: PlanModeConfig) => Promise<void>;
+  exitPlanMode: () => Promise<ExitPlanModeResult>;
+  commandRegistry: CommandRegistry;
   cleanup: () => Promise<void>;
 }
 
@@ -155,6 +165,9 @@ export async function wireAgent(options: AgentWiringOptions): Promise<WiredAgent
 
   // 5. Load plugins
   const hookRegistry = manager.getHookRegistry();
+  const commandRegistry = new CommandRegistry();
+  const serviceRegistry = new ServiceRegistry();
+
   const pluginCallbacks: PluginLoaderCallbacks = {
     registerTool: (def, handler) => {
       registry.register(def, handler, 'plugin');
@@ -165,12 +178,11 @@ export async function wireAgent(options: AgentWiringOptions): Promise<WiredAgent
     registerHook: (event, handler) => {
       return hookRegistry.register(event, handler);
     },
-    registerCommand: (_name, _handler) => {
-      // Commands not wired at this level yet
-      return { dispose: () => {} };
+    registerCommand: (name, handler) => {
+      return commandRegistry.register(name, handler);
     },
-    getService: <T>(_name: string): T => {
-      throw new Error('Service registry not wired yet');
+    getService: <T>(name: string): T => {
+      return serviceRegistry.get<T>(name);
     },
   };
 
@@ -196,7 +208,95 @@ export async function wireAgent(options: AgentWiringOptions): Promise<WiredAgent
     manager.setSkills(skills);
   }
 
-  // 7. Subscribe to NATS inbox with response routing
+  // 7. Create plan mode controller (before NATS subscription so onBeforeDispatch can use it)
+  const agentWorkspacePath = `${basePath}/agents/${agentEntry.id}`;
+  const planMode = new PlanModeController({
+    agentWorkspacePath,
+    fs,
+  });
+
+  // Register enter_plan_mode tool (always available — lets agent self-initiate planning)
+  registry.register(
+    enterPlanModeToolDefinition,
+    createEnterPlanModeHandler(
+      (config) => enterPlanMode(config),
+      () => planMode.getState(),
+    ),
+    'builtin',
+  );
+
+  /**
+   * Enter plan mode: registers hooks to enforce read-only constraints,
+   * adds plan-mode tools to the agent's tool set.
+   */
+  const enterPlanMode = async (config: PlanModeConfig) => {
+    const {
+      exitToolDefinition, exitToolHandler,
+      writePlanDefinition, writePlanHandler,
+      editPlanDefinition, editPlanHandler,
+    } = await planMode.enter(hookRegistry, config);
+
+    // Register plan-mode tools so the agent can call them
+    registry.register(exitToolDefinition, exitToolHandler, 'builtin');
+    registry.register(writePlanDefinition, writePlanHandler, 'builtin');
+    registry.register(editPlanDefinition, editPlanHandler, 'builtin');
+
+    // Rebuild effective tools to include plan-mode tools
+    const planTools = policyEngine.getEffectiveBuiltinTools({
+      agentId: agentEntry.id,
+    });
+    const planHandlerMap = registry.buildHandlerMap(
+      planTools.map((t) => t.name),
+    );
+    manager.setTools(planTools, planHandlerMap);
+
+    logger.info(`Agent "${agentEntry.id}" entered plan mode: ${config.slug}`);
+  };
+
+  /**
+   * Exit plan mode: disposes hooks, removes plan-mode tools,
+   * injects plan into context, and restores normal tools.
+   */
+  const exitPlanMode = async (): Promise<ExitPlanModeResult> => {
+    const result = await planMode.exit(hookRegistry);
+
+    // Remove plan-mode tools
+    registry.unregister('exit_plan_mode');
+    registry.unregister('write_plan');
+    registry.unregister('edit_plan');
+
+    // Restore default tools
+    const restoredTools = policyEngine.getEffectiveBuiltinTools({
+      agentId: agentEntry.id,
+    });
+    const restoredHandlerMap = registry.buildHandlerMap(
+      restoredTools.map((t) => t.name),
+    );
+    manager.setTools(restoredTools, restoredHandlerMap);
+
+    logger.info(`Agent "${agentEntry.id}" exited plan mode: ${result.planFilePath}`);
+    return result;
+  };
+
+  // Register plan mode as a service for plugins
+  serviceRegistry.register('planMode', {
+    enter: (config: PlanModeConfig) => enterPlanMode(config),
+    exit: () => exitPlanMode(),
+    getState: () => planMode.getState(),
+  });
+
+  // Register built-in 'plan' command
+  commandRegistry.register('plan', async (args: string) => {
+    const parts = args.trim().split(/\s+/);
+    const slug = parts[0];
+    if (!slug) return 'Usage: /plan <slug> [goal]';
+    if (planMode.getState().active) return 'Plan mode is already active.';
+    const goal = parts.slice(1).join(' ') || undefined;
+    await enterPlanMode({ slug, goal });
+    return `Entered plan mode: ${slug}`;
+  });
+
+  // 8. Subscribe to NATS inbox with response routing
 
   // Save default tools for restoration after binding overrides
   const defaultTools = effectiveTools;
@@ -285,8 +385,32 @@ export async function wireAgent(options: AgentWiringOptions): Promise<WiredAgent
         } catch { /* best-effort */ }
       }
     },
-    // onBeforeDispatch: apply binding overrides
-    (originalMsg: AgentMessage) => {
+    // onBeforeDispatch: parse /plan command and apply binding overrides
+    async (originalMsg: AgentMessage) => {
+      // Parse /plan command from message text
+      const data = originalMsg.data as Record<string, unknown> | undefined;
+      if (data && typeof data['text'] === 'string') {
+        const text = data['text'];
+        const planMatch = text.match(/^\/plan\s+(\S+)(?:\s+(.+))?$/s);
+        if (planMatch && !planMode.getState().active) {
+          const slug = planMatch[1]!;
+          const goal = planMatch[2]?.trim();
+          await enterPlanMode({ slug, goal });
+          // Rewrite message so the agent sees the goal, not the raw /plan command
+          data['text'] = goal
+            ? `Plan the following task: ${goal}`
+            : `Explore the codebase and create an implementation plan for: ${slug}`;
+        }
+      }
+
+      // Check metadata for plan mode signal (from orchestration or UI)
+      if (originalMsg.metadata?.['x-plan-mode'] === 'true' && !planMode.getState().active) {
+        const slug = originalMsg.metadata['x-plan-slug'] ?? 'remote-plan';
+        const goal = data && typeof data['text'] === 'string' ? data['text'] : undefined;
+        await enterPlanMode({ slug, goal });
+      }
+
+      // Apply binding overrides
       const overridesJson = originalMsg.metadata?.['x-binding-overrides'];
       if (overridesJson) {
         try {
@@ -319,6 +443,10 @@ export async function wireAgent(options: AgentWiringOptions): Promise<WiredAgent
     registry,
     policyEngine,
     memoryStore,
+    planMode,
+    enterPlanMode,
+    exitPlanMode,
+    commandRegistry,
     cleanup: async () => {
       if (memoryStore) {
         try {

@@ -16,6 +16,7 @@ export function buildAgentRegistry(
       getStatus: () => wired.manager.getStatus(),
       dispatch: (message: string, sessionId?: string) =>
         wired.manager.dispatch(message, sessionId),
+      enterPlanMode: (config) => wired.enterPlanMode(config),
     });
   }
 

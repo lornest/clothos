@@ -26,6 +26,14 @@ export const agentSpawnToolDefinition: ToolDefinition = {
         type: 'number',
         description: 'Timeout in milliseconds. Uses configured default if not specified.',
       },
+      planMode: {
+        type: 'boolean',
+        description: 'If true, target agent enters plan mode and creates an implementation plan before executing the task.',
+      },
+      planSlug: {
+        type: 'string',
+        description: 'Slug for the plan file when planMode is true. Defaults to a generated name.',
+      },
     },
     required: ['targetAgent', 'task'],
   },
@@ -54,6 +62,8 @@ export function createAgentSpawnHandler(
     const task = args['task'] as string;
     const context = args['context'] as string | undefined;
     const timeout = (args['timeout'] as number | undefined) ?? defaultTimeoutMs;
+    const planMode = args['planMode'] as boolean | undefined;
+    const planSlug = args['planSlug'] as string | undefined;
 
     // Look up target
     const entry = registry.get(targetAgent);
@@ -65,6 +75,16 @@ export function createAgentSpawnHandler(
     const status = entry.getStatus();
     if (status !== 'READY' && status !== 'RUNNING') {
       return { error: `Agent "${targetAgent}" is not available (status: ${status})` };
+    }
+
+    // Enter plan mode on target if requested
+    if (planMode && entry.enterPlanMode) {
+      const slug = planSlug ?? `delegated-${Date.now()}`;
+      try {
+        await entry.enterPlanMode({ slug, goal: task });
+      } catch (err) {
+        return { error: `Failed to enter plan mode on "${targetAgent}": ${err instanceof Error ? err.message : String(err)}` };
+      }
     }
 
     // Build delegation message

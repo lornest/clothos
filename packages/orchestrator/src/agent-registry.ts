@@ -5,6 +5,8 @@ export interface AgentRegistryEntry {
   agentId: string;
   getStatus(): AgentStatus;
   dispatch(message: string, sessionId?: string): AsyncGenerator<AgentEvent>;
+  /** Enter plan mode on this agent (if supported). */
+  enterPlanMode?(config: { slug: string; goal?: string }): Promise<void>;
 }
 
 /** Read-only lookup of wired agents. */
