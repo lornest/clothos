@@ -29,6 +29,7 @@ COPY packages/channels-telegram/package.json packages/channels-telegram/
 COPY packages/channels-whatsapp/package.json packages/channels-whatsapp/
 COPY packages/ui/package.json packages/ui/
 COPY packages/app/package.json packages/app/
+COPY packages/tui/package.json packages/tui/
 
 RUN pnpm install --frozen-lockfile
 
