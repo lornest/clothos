@@ -56,6 +56,7 @@ export interface AgentLoopOptions {
 /** Response from an LLM stream completion. */
 export interface StreamResponse {
   text: string;
+  thinking?: string;
   toolCalls?: import('./messages.js').ToolCall[];
   finishReason?: string;
   usage?: TokenUsage;

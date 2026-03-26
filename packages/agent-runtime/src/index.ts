@@ -59,6 +59,22 @@ export type { PiMonoProviderOptions } from './pi-mono-provider.js';
 // Re-export pi-ai utilities needed by consumers (e.g. REPL)
 export { getModel } from '@mariozechner/pi-ai';
 
+// Re-export pi-ai OAuth utilities for subscription-based auth
+export {
+  loginOpenAICodex,
+  refreshOpenAICodexToken,
+  openaiCodexOAuthProvider,
+  anthropicOAuthProvider,
+  getOAuthApiKey,
+  getOAuthProvider,
+  getOAuthProviders,
+} from '@mariozechner/pi-ai';
+export type {
+  OAuthCredentials,
+  OAuthProviderInterface,
+  OAuthLoginCallbacks,
+} from '@mariozechner/pi-ai';
+
 // Prompt enrichment — types
 export type {
   PromptMode,

@@ -14,12 +14,14 @@ export interface UseChatOptions {
 export interface UseChatResult {
   messages: ChatMessage[];
   isLoading: boolean;
+  sessionId?: string;
   send: (input: string) => void;
 }
 
 export function useChat({ agentId, gateway, onQuit }: UseChatOptions): UseChatResult {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const sessionIdRef = useRef<string | undefined>(undefined);
 
   const send = useCallback((input: string) => {
@@ -34,6 +36,7 @@ export function useChat({ agentId, gateway, onQuit }: UseChatOptions): UseChatRe
 
     if (trimmed === '/clear') {
       setMessages([]);
+      setSessionId(undefined);
       sessionIdRef.current = undefined;
       return;
     }
@@ -57,6 +60,7 @@ export function useChat({ agentId, gateway, onQuit }: UseChatOptions): UseChatRe
 
       // Track session ID from agent responses
       if (data?.sessionId && typeof data.sessionId === 'string') {
+        setSessionId(data.sessionId);
         sessionIdRef.current = data.sessionId;
       }
 
@@ -78,19 +82,53 @@ export function useChat({ agentId, gateway, onQuit }: UseChatOptions): UseChatRe
         return;
       }
 
-      // Agent response with text content
+      // Agent response with text content (and optional tool calls)
       if (response.type === 'task.response') {
         const text = typeof data?.text === 'string' ? data.text : JSON.stringify(data);
+
+        // Extract tool calls if present (these represent the agent's "thinking" steps)
+        const rawToolCalls = Array.isArray(data?.toolCalls) ? data.toolCalls : undefined;
+        const toolCalls = rawToolCalls?.map((tc: Record<string, unknown>) => ({
+          name: typeof tc.name === 'string' ? tc.name : 'unknown',
+          arguments: typeof tc.arguments === 'string' ? tc.arguments : JSON.stringify(tc.arguments ?? ''),
+        }));
+
+        // Extract thinking/reasoning content if present
+        const thinking = typeof data?.thinking === 'string' ? data.thinking : undefined;
+
         setMessages(prev => [...prev, {
           id: generateId(),
           role: 'assistant',
           content: text,
+          thinking,
+          toolCalls,
         }]);
+      }
+
+      // Tool result — update the most recent assistant message's matching tool call with result
+      if (response.type === 'task.tool_result') {
+        const name = typeof data?.name === 'string' ? data.name : '';
+        const result = typeof data?.result === 'string' ? data.result : JSON.stringify(data?.result ?? '');
+
+        setMessages(prev => {
+          const updated = [...prev];
+          // Walk backward to find the assistant message with a matching tool call
+          for (let i = updated.length - 1; i >= 0; i--) {
+            const msg = updated[i]!;
+            if (msg.role !== 'assistant' || !msg.toolCalls) continue;
+            const tc = msg.toolCalls.find(t => t.name === name && !t.result);
+            if (tc) {
+              tc.result = result;
+              break;
+            }
+          }
+          return updated;
+        });
       }
     });
 
     gateway.send(request);
   }, [agentId, gateway, onQuit]);
 
-  return { messages, isLoading, send };
+  return { messages, isLoading, sessionId, send };
 }

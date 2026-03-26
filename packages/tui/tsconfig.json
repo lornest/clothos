@@ -4,6 +4,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "jsx": "react-jsx",
+    "jsxImportSource": "@opentui/react",
     "module": "nodenext",
     "moduleResolution": "nodenext"
   },

@@ -5,6 +5,8 @@ import type { Logger } from '@clothos/core';
 import { loadConfig, applyEnvOverrides } from '@clothos/core';
 import { PiMonoProvider, getModel } from '@clothos/agent-runtime';
 import { bootstrap } from './bootstrap.js';
+import { getOrRefreshApiKey, getOAuthProviderForName } from './oauth-manager.js';
+import { runLogin } from './cli-login.js';
 
 function createNodeFs(): FileSystem {
   return {
@@ -61,7 +63,16 @@ async function main(): Promise<void> {
   // Apply env overlays for legacy configs (UserConfig overlays are applied during loadConfig)
   const config = applyEnvOverrides(result.config);
 
-  // 2. Set up LLM provider from resolved config
+  // 2. Handle --login flag for OAuth providers
+  if (process.argv.includes('--login')) {
+    const loginProvider = process.env['CLOTHOS_PROVIDER']
+      ?? config.auth.profiles[0]?.provider
+      ?? 'openai';
+    await runLogin(loginProvider, basePath);
+    process.exit(0);
+  }
+
+  // 3. Set up LLM provider from resolved config
   // CLOTHOS_PROVIDER and CLOTHOS_MODEL env vars override config for backward compatibility
   const providerName = process.env['CLOTHOS_PROVIDER']
     ?? config.auth.profiles[0]?.provider
@@ -69,8 +80,38 @@ async function main(): Promise<void> {
   const modelId = process.env['CLOTHOS_MODEL']
     ?? config.models.providers[0]?.models[0]
     ?? 'claude-sonnet-4-6';
+  const authMode = process.env['CLOTHOS_AUTH_MODE']
+    ?? config.auth.profiles[0]?.authMode
+    ?? 'apikey';
 
-  const model = getModel(providerName as Parameters<typeof getModel>[0], modelId as Parameters<typeof getModel>[1]);
+  // If using OAuth, load credentials and inject the API key into the environment
+  if (authMode === 'oauth') {
+    const apiKey = await getOrRefreshApiKey(providerName, basePath);
+    if (!apiKey) {
+      logger.error('No OAuth credentials found. Run with --login first.');
+      process.exit(1);
+    }
+    // pi-ai reads API keys from env vars — inject the OAuth token
+    if (providerName.startsWith('openai')) {
+      process.env['OPENAI_API_KEY'] = apiKey;
+    } else if (providerName === 'anthropic') {
+      process.env['ANTHROPIC_API_KEY'] = apiKey;
+    }
+    logger.info(`OAuth: loaded credentials for ${providerName}`);
+  }
+
+  // For getModel(), always use the base provider name (e.g. "openai" not "openai-completions")
+  const getModelProvider = providerName.startsWith('openai') ? 'openai' : providerName;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- pi-ai Model type is complex; provider cast is safe
+  let model: any = getModel(getModelProvider as Parameters<typeof getModel>[0], modelId as Parameters<typeof getModel>[1]);
+
+  // If using OAuth, force Chat Completions API (Codex tokens don't have Responses API scope)
+  if (authMode === 'oauth' && providerName.startsWith('openai')) {
+    model = { ...model, api: 'openai-completions' };
+    logger.info('OAuth: using Chat Completions API');
+  }
+
   const llmProvider = new PiMonoProvider({ model, id: 'pi-mono' });
 
   const app = await bootstrap({

@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util';
-import { render } from 'ink';
+import { createCliRenderer } from '@opentui/core';
+import { createRoot } from '@opentui/react';
 import { App } from './app.js';
 
 const DEFAULT_URL = 'ws://localhost:18789/ws';
@@ -45,7 +46,9 @@ Options:
   process.exit(0);
 }
 
-render(
+const renderer = await createCliRenderer({ exitOnCtrlC: true });
+
+createRoot(renderer).render(
   <App
     url={values.url!}
     token={values.token}

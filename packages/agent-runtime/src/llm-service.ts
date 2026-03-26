@@ -107,6 +107,7 @@ export class LLMService {
     options: CompletionOptions,
   ): Promise<StreamResponse> {
     let text = '';
+    let thinking = '';
     const toolCallMap = new Map<string, ToolCall>();
     let finishReason: string | undefined;
     let usage: TokenUsage | undefined;
@@ -114,6 +115,8 @@ export class LLMService {
     for await (const chunk of provider.streamCompletion(messages, tools, options)) {
       if (chunk.type === 'text_delta' && chunk.text) {
         text += chunk.text;
+      } else if (chunk.type === 'thinking_delta' && chunk.thinking) {
+        thinking += chunk.thinking;
       } else if (chunk.type === 'tool_call_delta' && chunk.toolCall) {
         const tc = chunk.toolCall;
         if (tc.id) {
@@ -145,6 +148,6 @@ export class LLMService {
     }
 
     const toolCalls = toolCallMap.size > 0 ? [...toolCallMap.values()] : undefined;
-    return { text, toolCalls, finishReason, usage };
+    return { text, thinking: thinking || undefined, toolCalls, finishReason, usage };
   }
 }

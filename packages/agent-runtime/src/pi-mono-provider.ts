@@ -74,12 +74,14 @@ export class PiMonoProvider implements LLMProvider {
           type: 'done',
           finishReason: mapStopReason(event.reason),
         };
+      } else if (event.type === 'thinking_delta') {
+        yield { type: 'thinking_delta', thinking: (event as Record<string, unknown>).delta as string };
       } else if (event.type === 'error') {
         const raw = (event as Record<string, unknown>).error;
         console.error(`[LLM] pi-ai stream error:`, JSON.stringify(raw, null, 2));
         yield { type: 'done', finishReason: 'error' };
       }
-      // Ignore: start, text_start, text_end, thinking_*, toolcall_start, toolcall_delta
+      // Ignore: start, text_start, text_end, thinking_start, thinking_end, toolcall_start, toolcall_delta
     }
   }
 

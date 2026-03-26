@@ -12,5 +12,13 @@ export interface ChatMessage {
   id: string;
   role: ChatMessageRole;
   content: string;
+  thinking?: string;
   toolCalls?: ToolCallDisplay[];
+}
+
+export interface ContextInfo {
+  cwd: string;
+  gitBranch: string | null;
+  gitDirty: boolean;
+  activeFiles: string[];
 }

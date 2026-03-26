@@ -42,8 +42,9 @@ services:
     env_file:
       - ../config/.env.node-a
     environment:
-      - CLOTHOS_PROVIDER=${CLOTHOS_PROVIDER:-anthropic}
-      - CLOTHOS_MODEL=${CLOTHOS_MODEL:-claude-sonnet-4-20250514}
+      - CLOTHOS_PROVIDER=${CLOTHOS_PROVIDER:-openai-completions}
+      - CLOTHOS_MODEL=${CLOTHOS_MODEL:-gpt-4.1}
+      - CLOTHOS_AUTH_MODE=${CLOTHOS_AUTH_MODE:-apikey}
     depends_on:
       nats:
         condition: service_started
@@ -64,8 +65,9 @@ services:
     env_file:
       - ../config/.env.node-b
     environment:
-      - CLOTHOS_PROVIDER=${CLOTHOS_PROVIDER:-anthropic}
-      - CLOTHOS_MODEL=${CLOTHOS_MODEL:-claude-sonnet-4-20250514}
+      - CLOTHOS_PROVIDER=${CLOTHOS_PROVIDER:-openai-completions}
+      - CLOTHOS_MODEL=${CLOTHOS_MODEL:-gpt-4.1}
+      - CLOTHOS_AUTH_MODE=${CLOTHOS_AUTH_MODE:-apikey}
     depends_on:
       nats:
         condition: service_started

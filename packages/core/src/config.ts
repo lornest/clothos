@@ -145,6 +145,7 @@ export interface AuthConfig {
 export interface AuthProfile {
   id: string;
   provider: string;
+  authMode?: 'apikey' | 'oauth';
   apiKey?: string;
   apiKeyEnv?: string;
 }

@@ -3,8 +3,9 @@ import type { ToolDefinition } from './tools.js';
 
 /** A single chunk from an LLM stream. */
 export interface StreamChunk {
-  type: 'text_delta' | 'tool_call_delta' | 'usage' | 'done';
+  type: 'text_delta' | 'thinking_delta' | 'tool_call_delta' | 'usage' | 'done';
   text?: string;
+  thinking?: string;
   toolCall?: Partial<ToolCall>;
   usage?: { inputTokens: number; outputTokens: number };
   finishReason?: string;

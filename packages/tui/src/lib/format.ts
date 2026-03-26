@@ -2,7 +2,7 @@ import type { ChatMessageRole } from '../types.js';
 
 const ROLE_COLORS: Record<ChatMessageRole, string> = {
   user: '\x1b[32m',      // green
-  assistant: '\x1b[34m', // blue
+  assistant: '\x1b[36m', // cyan
   tool: '\x1b[2m',       // dim
   system: '\x1b[33m',    // yellow
 };
@@ -20,7 +20,7 @@ export function colorize(text: string, role: ChatMessageRole): string {
 export function roleLabel(role: ChatMessageRole): string {
   switch (role) {
     case 'user': return 'you';
-    case 'assistant': return 'assistant';
+    case 'assistant': return 'agent';
     case 'tool': return 'tool';
     case 'system': return 'system';
   }

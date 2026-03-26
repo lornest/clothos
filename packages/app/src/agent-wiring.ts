@@ -318,6 +318,18 @@ export async function wireAgent(options: AgentWiringOptions): Promise<WiredAgent
           undefined,
           manager.getCurrentSessionId() ?? undefined,
         );
+        const responseData = response.data as Record<string, unknown>;
+        // Include thinking/reasoning content if present
+        if (event.content.thinking) {
+          responseData.thinking = event.content.thinking;
+        }
+        // Include tool calls so the TUI can render them
+        if (event.content.toolCalls && event.content.toolCalls.length > 0) {
+          responseData.toolCalls = event.content.toolCalls.map((tc: { id: string; name: string; arguments: string }) => ({
+            name: tc.name,
+            arguments: tc.arguments,
+          }));
+        }
         gateway.sendResponse(correlationId, response);
 
         // Cross-node reply-to routing: forward event to the caller's reply inbox
@@ -338,6 +350,26 @@ export async function wireAgent(options: AgentWiringOptions): Promise<WiredAgent
             natsClient.publishCore(originalMsg.replyTo, replyMsg);
           } catch { /* best-effort — caller may have timed out */ }
         }
+      } else if (event.type === 'tool_result') {
+        // Forward tool results so the TUI can show them as "thinking" updates
+        const toolResultMsg: AgentMessage = {
+          id: generateId(),
+          specversion: '1.0',
+          type: 'task.tool_result',
+          source: `agent://${agentEntry.id}`,
+          target: originalMsg.source,
+          time: now(),
+          datacontenttype: 'application/json',
+          data: {
+            name: event.name,
+            toolCallId: event.toolCallId,
+            result: event.result,
+            sessionId: manager.getCurrentSessionId() ?? undefined,
+          },
+          correlationId,
+          causationId: originalMsg.id,
+        };
+        gateway.sendResponse(correlationId, toolResultMsg);
       } else if (event.type === 'error') {
         const response: AgentMessage = {
           id: generateId(),

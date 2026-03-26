@@ -21,6 +21,8 @@ export interface LlmConfig {
   model?: string;
   /** Env var name for the API key. Auto-inferred from provider if omitted. */
   apiKeyEnv?: string;
+  /** Auth mode: 'apikey' (default) or 'oauth' (Codex subscription, etc.). */
+  authMode?: 'apikey' | 'oauth';
 }
 
 /**

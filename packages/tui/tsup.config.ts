@@ -7,6 +7,9 @@ export default defineConfig([
     dts: true,
     clean: true,
     sourcemap: true,
+    esbuildOptions(options) {
+      options.jsxImportSource = '@opentui/react';
+    },
   },
   {
     entry: ['src/cli.tsx'],
@@ -15,7 +18,10 @@ export default defineConfig([
     clean: false,
     sourcemap: true,
     banner: {
-      js: '#!/usr/bin/env node',
+      js: '#!/usr/bin/env bun',
+    },
+    esbuildOptions(options) {
+      options.jsxImportSource = '@opentui/react';
     },
   },
 ]);

@@ -6,12 +6,16 @@ export const PROVIDER_API_KEY_MAP: Record<string, string> = {
   openai: 'OPENAI_API_KEY',
   'openai-responses': 'OPENAI_API_KEY',
   'openai-completions': 'OPENAI_API_KEY',
+  'openai-codex': 'OPENAI_API_KEY',
   openrouter: 'OPENROUTER_API_KEY',
   google: 'GOOGLE_API_KEY',
   'google-vertex': 'GOOGLE_APPLICATION_CREDENTIALS',
   'amazon-bedrock': 'AWS_ACCESS_KEY_ID',
   'azure-openai-responses': 'AZURE_OPENAI_API_KEY',
 };
+
+/** Providers that support OAuth login via pi-ai. */
+export const OAUTH_PROVIDERS = ['openai', 'openai-codex'] as const;
 
 /**
  * Complete default configuration.
